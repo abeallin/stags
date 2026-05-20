@@ -8,9 +8,10 @@ import { computeSwap } from "../lib/reorder";
 import Header from "../components/Header";
 import DayTabs from "../components/DayTabs";
 import Day from "../components/Day";
-import PassphraseGate from "../components/PassphraseGate";
 import { pb } from "../lib/pb";
 import type { Slot as SlotType } from "../lib/types";
+
+const DISPLAY_NAME_KEY = "stags.displayName";
 
 export default function Stag({ slug }: { slug: string }) {
   const { bundle, error } = useStagData(slug);
@@ -18,8 +19,7 @@ export default function Stag({ slug }: { slug: string }) {
   const [userPickedDay, setUserPickedDay] = useState(false);
   const [now, setNow] = useState(new Date());
   const [editing, setEditing] = useState(false);
-  const [showGate, setShowGate] = useState(false);
-  const [displayName, setDisplayName] = useState<string>(localStorage.getItem("stags.displayName") ?? "");
+  const [displayName, setDisplayName] = useState<string>(localStorage.getItem(DISPLAY_NAME_KEY) ?? "");
 
   useEffect(() => {
     const id = setInterval(() => setNow(new Date()), 30_000);
@@ -186,11 +186,15 @@ export default function Stag({ slug }: { slug: string }) {
       setEditing(false);
       return;
     }
-    if (pb.authStore.isValid) {
-      setEditing(true);
-    } else {
-      setShowGate(true);
+    let name = displayName;
+    if (!name) {
+      name = (window.prompt("Your name (lads see this on edits):") ?? "").trim();
+      if (name) {
+        localStorage.setItem(DISPLAY_NAME_KEY, name);
+        setDisplayName(name);
+      }
     }
+    setEditing(true);
   }
 
   const slotsByDay = useMemo(() => {
@@ -253,17 +257,6 @@ export default function Stag({ slug }: { slug: string }) {
           onDeleteDay={editing ? handleDeleteDay : undefined}
         />
       ))}
-      {showGate && (
-        <PassphraseGate
-          slug={slug}
-          onAuthed={(name) => {
-            setDisplayName(name);
-            setShowGate(false);
-            setEditing(true);
-          }}
-          onCancel={() => setShowGate(false)}
-        />
-      )}
     </div>
   );
 }
