@@ -553,27 +553,87 @@ body.editing .slot-edit-icons { display: flex; }
   cursor: pointer;
 }
 
-/* ─── desktop: phone-on-a-shelf ─────────────────────────────────────── */
-@media (min-width: 720px) {
+/* ─── desktop: sidebar nav + slot pane ──────────────────────────────── */
+@media (min-width: 900px) {
   body {
     background:
-      radial-gradient(ellipse at 20% 10%, rgba(200, 74, 44, 0.05) 0%, transparent 55%),
-      radial-gradient(ellipse at 80% 90%, rgba(44, 95, 124, 0.05) 0%, transparent 55%),
+      radial-gradient(ellipse at 15% 0%,  rgba(200, 74, 44, 0.05) 0%, transparent 50%),
+      radial-gradient(ellipse at 85% 100%, rgba(44, 95, 124, 0.05) 0%, transparent 50%),
       var(--bg-alt);
     background-attachment: fixed;
-    padding: 48px 24px;
-    min-height: 100vh;
+    padding: 0;
   }
+
   .container {
+    max-width: 1200px;
     margin: 0 auto;
-    border-radius: 20px;
-    overflow: hidden;
-    min-height: auto;
-    box-shadow:
-      0 24px 48px -16px rgba(26, 26, 26, 0.20),
-      0 4px 12px rgba(26, 26, 26, 0.06);
+    min-height: 100vh;
+    padding: 0;
+    display: grid;
+    grid-template-columns: 340px minmax(0, 1fr);
+    grid-template-rows: auto 1fr;
     background: var(--bg);
+    box-shadow: 0 0 64px rgba(26, 26, 26, 0.12);
   }
-  /* trim the bottom whitespace so the card ends cleanly */
-  .day-section { padding-bottom: 32px; }
+
+  /* sidebar = header + day-tabs in left column */
+  .header {
+    grid-column: 1;
+    grid-row: 1;
+    padding: 48px 28px 28px;
+  }
+  .header::before { top: -40px; right: -40px; }
+  .header::after  { top: -10px; right: -10px; }
+  .header h1 { font-size: 40px; }
+  .edit-toggle { top: 20px; right: 20px; }
+
+  .day-tabs {
+    grid-column: 1;
+    grid-row: 2;
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 2px;
+    padding: 8px 16px 32px;
+    background: var(--ink);
+    border-top: 1px solid rgba(232, 213, 183, 0.1);
+  }
+  .tab {
+    text-align: left;
+    padding: 12px 14px;
+    display: flex;
+    flex-direction: row !important;
+    justify-content: space-between;
+    align-items: center;
+    border-radius: 8px;
+    border-bottom: none !important;
+    color: var(--accent-soft);
+    flex: 0 0 auto;
+  }
+  .tab .day-num {
+    display: inline-block !important;
+    font-size: 22px !important;
+    margin-top: 0 !important;
+    color: inherit !important;
+  }
+  .tab.active {
+    background: var(--accent);
+    color: var(--bg);
+  }
+  .tab.active .day-num { color: var(--bg) !important; }
+
+  /* slot pane = right column */
+  .day-section {
+    grid-column: 2;
+    grid-row: 1 / -1;
+    align-self: start;
+    padding: 56px 64px 64px;
+    max-width: none;
+  }
+  .day-heading { margin-bottom: 32px; }
+  .day-title  { font-size: 44px !important; }
+  .slot { max-width: 720px; }
+
+  /* tighten the original header decorations on tall sidebar */
+  .header-meta { margin-top: 24px; }
 }
