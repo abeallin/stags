@@ -4,12 +4,18 @@ import { determineTripState, findTodayDayId, formatTMinus, slotStateMap } from "
 import Header from "../components/Header";
 import DayTabs from "../components/DayTabs";
 import Day from "../components/Day";
+import PassphraseGate from "../components/PassphraseGate";
+import { pb } from "../lib/pb";
 
 export default function Stag({ slug }: { slug: string }) {
   const { bundle, error } = useStagData(slug);
   const [activeDayId, setActiveDayId] = useState<string>("");
   const [userPickedDay, setUserPickedDay] = useState(false);
   const [now, setNow] = useState(new Date());
+  const [editing, setEditing] = useState(false);
+  const [showGate, setShowGate] = useState(false);
+  const [displayName, setDisplayName] = useState<string>(localStorage.getItem("stags.displayName") ?? "");
+  void displayName; // used by PassphraseGate onAuthed callback in Task 17
 
   useEffect(() => {
     const id = setInterval(() => setNow(new Date()), 30_000);
@@ -34,6 +40,23 @@ export default function Stag({ slug }: { slug: string }) {
       setActiveDayId(bundle.days[0]?.id ?? "");
     }
   }, [bundle, userPickedDay, now]);
+
+  useEffect(() => {
+    document.body.classList.toggle("editing", editing);
+    return () => document.body.classList.remove("editing");
+  }, [editing]);
+
+  function handleToggleEdit() {
+    if (editing) {
+      setEditing(false);
+      return;
+    }
+    if (pb.authStore.isValid) {
+      setEditing(true);
+    } else {
+      setShowGate(true);
+    }
+  }
 
   const slotsByDay = useMemo(() => {
     const m = new Map<string, import("../lib/types").Slot[]>();
@@ -66,7 +89,12 @@ export default function Stag({ slug }: { slug: string }) {
 
   return (
     <div className="container">
-      <Header stag={bundle.stag} tripBadge={badge} />
+      <Header
+        stag={bundle.stag}
+        tripBadge={badge}
+        editing={editing}
+        onToggleEdit={handleToggleEdit}
+      />
       <DayTabs
         days={bundle.days}
         activeDayId={activeDayId}
@@ -81,6 +109,17 @@ export default function Stag({ slug }: { slug: string }) {
           slotStates={slotStates.get(d.id)}
         />
       ))}
+      {showGate && (
+        <PassphraseGate
+          slug={slug}
+          onAuthed={(name) => {
+            setDisplayName(name);
+            setShowGate(false);
+            setEditing(true);
+          }}
+          onCancel={() => setShowGate(false)}
+        />
+      )}
     </div>
   );
 }
