@@ -30,7 +30,7 @@ export default function Stag({ slug }: { slug: string }) {
     if (!bundle) return;
     document.documentElement.style.setProperty("--accent", bundle.stag.accent_color);
     const link = document.getElementById("dynamic-manifest") as HTMLLinkElement | null;
-    if (link) link.href = `manifest-${slug}.webmanifest`;
+    if (link) link.href = `${import.meta.env.BASE_URL}manifest-${slug}.webmanifest`;
     document.title = bundle.stag.name;
   }, [bundle, slug]);
 
