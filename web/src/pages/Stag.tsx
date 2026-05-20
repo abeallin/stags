@@ -1,11 +1,13 @@
 import { useEffect, useState, useMemo } from "react";
 import { useStagData } from "../lib/useStagData";
+import { useEditHistory } from "../lib/useEditHistory";
 import { determineTripState, findTodayDayId, formatTMinus, slotStateMap } from "../lib/time";
 import Header from "../components/Header";
 import DayTabs from "../components/DayTabs";
 import Day from "../components/Day";
 import PassphraseGate from "../components/PassphraseGate";
 import { pb } from "../lib/pb";
+import type { Slot as SlotType, Day as DayType } from "../lib/types";
 
 export default function Stag({ slug }: { slug: string }) {
   const { bundle, error } = useStagData(slug);
@@ -45,7 +47,70 @@ export default function Stag({ slug }: { slug: string }) {
     return () => document.body.classList.remove("editing");
   }, [editing]);
 
-  async function handleSlotSave(slotId: string, patch: Partial<import("../lib/types").Slot>) {
+  const edits = useEditHistory(bundle?.stag.id);
+  const lastEdit = edits[0];
+
+  async function handleUndo() {
+    if (!lastEdit || !bundle) return;
+    switch (lastEdit.kind) {
+      case "slot.update":
+        if (lastEdit.before) {
+          const before = lastEdit.before as SlotType;
+          await pb.collection("slots").update(lastEdit.target_id, {
+            start_time:  before.start_time,
+            time_label:  before.time_label,
+            title:       before.title,
+            note:        before.note,
+            tags:        before.tags,
+            is_featured: before.is_featured,
+          });
+        }
+        break;
+      case "slot.create":
+        await pb.collection("slots").delete(lastEdit.target_id);
+        break;
+      case "slot.delete":
+        if (lastEdit.before) {
+          const before = lastEdit.before as SlotType;
+          await pb.collection("slots").create({
+            day:         before.day,
+            start_time:  before.start_time,
+            time_label:  before.time_label,
+            title:       before.title,
+            note:        before.note,
+            tags:        before.tags,
+            is_featured: before.is_featured,
+            sort_order:  before.sort_order,
+          });
+        }
+        break;
+      case "slot.reorder":
+        if (lastEdit.before && lastEdit.after) {
+          const beforeData = lastEdit.before as { sort_order: number; neighbour: string; neighbourOrder: number };
+          await pb.collection("slots").update(lastEdit.target_id, { sort_order: beforeData.sort_order });
+          await pb.collection("slots").update(beforeData.neighbour, { sort_order: beforeData.neighbourOrder });
+        }
+        break;
+      case "day.create":
+        await pb.collection("days").delete(lastEdit.target_id);
+        break;
+      case "day.delete":
+        if (lastEdit.before) {
+          const before = lastEdit.before as DayType;
+          await pb.collection("days").create({
+            stag:       before.stag,
+            date:       before.date,
+            title:      before.title,
+            subtitle:   before.subtitle,
+            sort_order: before.sort_order,
+          });
+        }
+        break;
+    }
+    await pb.collection("edits").delete(lastEdit.id);
+  }
+
+  async function handleSlotSave(slotId: string, patch: Partial<SlotType>) {
     if (!bundle) return;
     const before = bundle.slots.find(s => s.id === slotId);
     await pb.collection("slots").update(slotId, patch);
@@ -174,7 +239,7 @@ export default function Stag({ slug }: { slug: string }) {
   }
 
   const slotsByDay = useMemo(() => {
-    const m = new Map<string, import("../lib/types").Slot[]>();
+    const m = new Map<string, SlotType[]>();
     if (!bundle) return m;
     for (const s of bundle.slots) {
       const list = m.get(s.day) ?? [];
@@ -209,6 +274,8 @@ export default function Stag({ slug }: { slug: string }) {
         tripBadge={badge}
         editing={editing}
         onToggleEdit={handleToggleEdit}
+        lastEdit={lastEdit}
+        onUndo={editing ? handleUndo : undefined}
       />
       <DayTabs
         days={bundle.days}
