@@ -56,62 +56,66 @@ export default function Stag({ slug }: { slug: string }) {
 
   async function handleUndo() {
     if (!lastEdit || !bundle) return;
-    switch (lastEdit.kind) {
-      case "slot.update":
-        if (lastEdit.before) {
-          const before = lastEdit.before as SlotType;
-          await pb.collection("slots").update(lastEdit.target_id, {
-            start_time:  before.start_time,
-            time_label:  before.time_label,
-            title:       before.title,
-            note:        before.note,
-            tags:        before.tags,
-            is_featured: before.is_featured,
-          });
-        }
-        break;
-      case "slot.create":
-        await pb.collection("slots").delete(lastEdit.target_id);
-        break;
-      case "slot.delete":
-        if (lastEdit.before) {
-          const before = lastEdit.before as SlotType;
-          await pb.collection("slots").create({
-            day:         before.day,
-            start_time:  before.start_time,
-            time_label:  before.time_label,
-            title:       before.title,
-            note:        before.note,
-            tags:        before.tags,
-            is_featured: before.is_featured,
-            sort_order:  before.sort_order,
-          });
-        }
-        break;
-      case "slot.reorder":
-        if (lastEdit.before && lastEdit.after) {
-          const beforeData = lastEdit.before as { sort_order: number; neighbour: string; neighbourOrder: number };
-          await pb.collection("slots").update(lastEdit.target_id, { sort_order: beforeData.sort_order });
-          await pb.collection("slots").update(beforeData.neighbour, { sort_order: beforeData.neighbourOrder });
-        }
-        break;
-      case "day.create":
-        await pb.collection("days").delete(lastEdit.target_id);
-        break;
-      case "day.delete":
-        if (lastEdit.before) {
-          const before = lastEdit.before as DayType;
-          await pb.collection("days").create({
-            stag:       before.stag,
-            date:       before.date,
-            title:      before.title,
-            subtitle:   before.subtitle,
-            sort_order: before.sort_order,
-          });
-        }
-        break;
+    try {
+      switch (lastEdit.kind) {
+        case "slot.update":
+          if (lastEdit.before) {
+            const before = lastEdit.before as SlotType;
+            await pb.collection("slots").update(lastEdit.target_id, {
+              start_time:  before.start_time,
+              time_label:  before.time_label,
+              title:       before.title,
+              note:        before.note,
+              tags:        before.tags,
+              is_featured: before.is_featured,
+            });
+          }
+          break;
+        case "slot.create":
+          await pb.collection("slots").delete(lastEdit.target_id);
+          break;
+        case "slot.delete":
+          if (lastEdit.before) {
+            const before = lastEdit.before as SlotType;
+            await pb.collection("slots").create({
+              day:         before.day,
+              start_time:  before.start_time,
+              time_label:  before.time_label,
+              title:       before.title,
+              note:        before.note,
+              tags:        before.tags,
+              is_featured: before.is_featured,
+              sort_order:  before.sort_order,
+            });
+          }
+          break;
+        case "slot.reorder":
+          if (lastEdit.before && lastEdit.after) {
+            const beforeData = lastEdit.before as { sort_order: number; neighbour: string; neighbourOrder: number };
+            await pb.collection("slots").update(lastEdit.target_id, { sort_order: beforeData.sort_order });
+            await pb.collection("slots").update(beforeData.neighbour, { sort_order: beforeData.neighbourOrder });
+          }
+          break;
+        case "day.create":
+          await pb.collection("days").delete(lastEdit.target_id);
+          break;
+        case "day.delete":
+          if (lastEdit.before) {
+            const before = lastEdit.before as DayType;
+            await pb.collection("days").create({
+              stag:       before.stag,
+              date:       before.date,
+              title:      before.title,
+              subtitle:   before.subtitle,
+              sort_order: before.sort_order,
+            });
+          }
+          break;
+      }
+      await pb.collection("edits").delete(lastEdit.id);
+    } catch (err) {
+      alert(`Couldn't undo: ${String(err)}`);
     }
-    await pb.collection("edits").delete(lastEdit.id);
   }
 
   async function handleSlotSave(slotId: string, patch: Partial<SlotType>) {

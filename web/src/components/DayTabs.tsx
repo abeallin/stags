@@ -13,7 +13,7 @@ export default function DayTabs({ days, activeDayId, onSelect, onAddDay }: Props
   return (
     <nav className="day-tabs">
       {days.map(d => {
-        const dt = new Date(d.date);
+        const dt = new Date(d.date + "T12:00");
         return (
           <button
             key={d.id}

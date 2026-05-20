@@ -4,6 +4,7 @@ import {
   findCurrentSlot,
   findTodayDayId,
   formatTMinus,
+  slotStateMap,
 } from "../lib/time";
 import type { Stag, Day, Slot } from "../lib/types";
 
@@ -76,5 +77,19 @@ describe("formatTMinus", () => {
   });
   it("returns 'today' when same day", () => {
     expect(formatTMinus("2026-06-03", new Date("2026-06-03T09:00"))).toBe("Today");
+  });
+});
+
+describe("slotStateMap", () => {
+  it("assigns states by chronological order, not sort_order", () => {
+    // Two slots in the same day. sort_order is reversed vs start_time.
+    const slotsOutOfOrder: Slot[] = [
+      { id: "a", day: "d1", start_time: "2026-06-03T22:00", time_label: "10pm", title: "Bar",    note: "", tags: [], is_featured: false, sort_order: 0 },
+      { id: "b", day: "d1", start_time: "2026-06-03T20:00", time_label: "8pm",  title: "Arrive", note: "", tags: [], is_featured: false, sort_order: 1 },
+    ];
+    // At 21:30: "b" (8pm) should be past or now, "a" (10pm) should still be future.
+    const m = slotStateMap(slotsOutOfOrder, "d1", new Date("2026-06-03T21:30"));
+    expect(m.get("b")).toBe("now");
+    expect(m.get("a")).toBe("future");
   });
 });

@@ -18,7 +18,7 @@ export default function Day({ day, slots, active, slotStates, onSlotSave, onSlot
     <section className={`day-section${active ? " active" : ""}`} data-day-id={day.id} style={{ position: "relative" }}>
       <div className="day-heading">
         <div className="day-date">
-          {new Date(day.date).toLocaleDateString("en-GB", { weekday: "long", day: "numeric", month: "long" })}
+          {new Date(day.date + "T12:00").toLocaleDateString("en-GB", { weekday: "long", day: "numeric", month: "long" })}
         </div>
         <h2 className="day-title">{day.title}</h2>
         {day.subtitle && <div className="day-meta">{day.subtitle}</div>}

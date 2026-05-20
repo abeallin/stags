@@ -16,6 +16,21 @@ export function useStagData(slug: string) {
     let cancelled = false;
     const unsubs: Array<() => void> = [];
 
+    async function safeSubscribe<T extends { id: string }>(
+      collection: string,
+      topic: string,
+      handler: (e: { action: string; record: T }) => void,
+    ) {
+      const unsub = await pb.collection(collection).subscribe<T>(topic, handler);
+      const wrapped = () => { unsub(); };
+      if (cancelled) {
+        // Effect already torn down; unsubscribe immediately
+        wrapped();
+      } else {
+        unsubs.push(wrapped);
+      }
+    }
+
     async function load() {
       try {
         const stag = await pb.collection("stags").getFirstListItem<Stag>(`slug="${slug}"`);
@@ -30,13 +45,11 @@ export function useStagData(slug: string) {
         if (cancelled) return;
         setBundle({ stag, days, slots });
 
-        // ─── Subscribe ─────────────────────────────────────────
-        const stagUnsub = await pb.collection("stags").subscribe<Stag>(stag.id, (e) => {
+        await safeSubscribe<Stag>("stags", stag.id, (e) => {
           setBundle(b => b ? { ...b, stag: e.record } : b);
         });
-        unsubs.push(() => stagUnsub());
 
-        const daysUnsub = await pb.collection("days").subscribe<Day>("*", (e) => {
+        await safeSubscribe<Day>("days", "*", (e) => {
           setBundle(b => {
             if (!b || e.record.stag !== stag.id) return b;
             const next = { ...b };
@@ -47,9 +60,8 @@ export function useStagData(slug: string) {
             return next;
           });
         });
-        unsubs.push(() => daysUnsub());
 
-        const slotsUnsub = await pb.collection("slots").subscribe<Slot>("*", (e) => {
+        await safeSubscribe<Slot>("slots", "*", (e) => {
           setBundle(b => {
             if (!b) return b;
             const dayBelongsToStag = b.days.some(d => d.id === e.record.day);
@@ -61,7 +73,6 @@ export function useStagData(slug: string) {
             return next;
           });
         });
-        unsubs.push(() => slotsUnsub());
       } catch (e) {
         if (!cancelled) setError(String(e));
       }

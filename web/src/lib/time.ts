@@ -68,7 +68,7 @@ export function slotStateMap(
   const currentId = findCurrentSlot(slots, dayId, now);
   const daySlots = slots
     .filter(s => s.day === dayId)
-    .sort((a, b) => a.sort_order - b.sort_order);
+    .sort((a, b) => +new Date(a.start_time) - +new Date(b.start_time));
 
   let foundCurrent = false;
   for (const s of daySlots) {
