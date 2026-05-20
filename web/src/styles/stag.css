@@ -451,6 +451,7 @@
 .edit-toggle {
   position: absolute;
   top: 24px; right: 24px;
+  z-index: 2;
   background: transparent;
   color: var(--accent-soft);
   border: 1px solid var(--accent-soft);
