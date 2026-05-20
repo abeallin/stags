@@ -49,7 +49,9 @@ export function usePresence(stagId: string | undefined, displayName: string) {
           sort:   "-last_seen",
         });
         setViewers(list);
-        setTimeout(refresh, 10_000);
+        // Realtime subscription below fires refresh on any presence change;
+        // this poll is a fallback safety net only — long interval is fine.
+        setTimeout(refresh, 60_000);
       }
       refresh();
 

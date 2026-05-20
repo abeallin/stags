@@ -3,12 +3,14 @@ import { useStagData } from "../lib/useStagData";
 import { useEditHistory } from "../lib/useEditHistory";
 import { usePresence } from "../lib/usePresence";
 import { determineTripState, findTodayDayId, formatTMinus, slotStateMap } from "../lib/time";
+import { buildUndoOps } from "../lib/undo";
+import { computeSwap } from "../lib/reorder";
 import Header from "../components/Header";
 import DayTabs from "../components/DayTabs";
 import Day from "../components/Day";
 import PassphraseGate from "../components/PassphraseGate";
 import { pb } from "../lib/pb";
-import type { Slot as SlotType, Day as DayType } from "../lib/types";
+import type { Slot as SlotType } from "../lib/types";
 
 export default function Stag({ slug }: { slug: string }) {
   const { bundle, error } = useStagData(slug);
@@ -56,61 +58,13 @@ export default function Stag({ slug }: { slug: string }) {
 
   async function handleUndo() {
     if (!lastEdit || !bundle) return;
+    const ops = buildUndoOps(lastEdit);
+    if (ops.length === 0) return;
     try {
-      switch (lastEdit.kind) {
-        case "slot.update":
-          if (lastEdit.before) {
-            const before = lastEdit.before as SlotType;
-            await pb.collection("slots").update(lastEdit.target_id, {
-              start_time:  before.start_time,
-              time_label:  before.time_label,
-              title:       before.title,
-              note:        before.note,
-              tags:        before.tags,
-              is_featured: before.is_featured,
-            });
-          }
-          break;
-        case "slot.create":
-          await pb.collection("slots").delete(lastEdit.target_id);
-          break;
-        case "slot.delete":
-          if (lastEdit.before) {
-            const before = lastEdit.before as SlotType;
-            await pb.collection("slots").create({
-              day:         before.day,
-              start_time:  before.start_time,
-              time_label:  before.time_label,
-              title:       before.title,
-              note:        before.note,
-              tags:        before.tags,
-              is_featured: before.is_featured,
-              sort_order:  before.sort_order,
-            });
-          }
-          break;
-        case "slot.reorder":
-          if (lastEdit.before && lastEdit.after) {
-            const beforeData = lastEdit.before as { sort_order: number; neighbour: string; neighbourOrder: number };
-            await pb.collection("slots").update(lastEdit.target_id, { sort_order: beforeData.sort_order });
-            await pb.collection("slots").update(beforeData.neighbour, { sort_order: beforeData.neighbourOrder });
-          }
-          break;
-        case "day.create":
-          await pb.collection("days").delete(lastEdit.target_id);
-          break;
-        case "day.delete":
-          if (lastEdit.before) {
-            const before = lastEdit.before as DayType;
-            await pb.collection("days").create({
-              stag:       before.stag,
-              date:       before.date,
-              title:      before.title,
-              subtitle:   before.subtitle,
-              sort_order: before.sort_order,
-            });
-          }
-          break;
+      for (const op of ops) {
+        if (op.op === "update") await pb.collection(op.collection).update(op.id, op.data);
+        else if (op.op === "delete") await pb.collection(op.collection).delete(op.id);
+        else if (op.op === "create") await pb.collection(op.collection).create(op.data);
       }
       await pb.collection("edits").delete(lastEdit.id);
     } catch (err) {
@@ -148,23 +102,16 @@ export default function Stag({ slug }: { slug: string }) {
 
   async function handleSlotMove(slotId: string, direction: "up" | "down") {
     if (!bundle) return;
-    const slot = bundle.slots.find(s => s.id === slotId);
-    if (!slot) return;
-    const daySlots = bundle.slots
-      .filter(s => s.day === slot.day)
-      .sort((a, b) => a.sort_order - b.sort_order);
-    const idx = daySlots.findIndex(s => s.id === slotId);
-    const targetIdx = direction === "up" ? idx - 1 : idx + 1;
-    if (targetIdx < 0 || targetIdx >= daySlots.length) return;
-    const neighbour = daySlots[targetIdx];
-    await pb.collection("slots").update(slot.id,      { sort_order: neighbour.sort_order });
-    await pb.collection("slots").update(neighbour.id, { sort_order: slot.sort_order });
+    const swap = computeSwap(bundle.slots, slotId, direction);
+    if (!swap) return;
+    await pb.collection("slots").update(swap.slotA.id, { sort_order: swap.slotA.sort_order });
+    await pb.collection("slots").update(swap.slotB.id, { sort_order: swap.slotB.sort_order });
     await pb.collection("edits").create({
       stag:      bundle.stag.id,
       kind:      "slot.reorder",
       target_id: slotId,
-      before:    { sort_order: slot.sort_order, neighbour: neighbour.id, neighbourOrder: neighbour.sort_order },
-      after:     { sort_order: neighbour.sort_order, neighbour: neighbour.id, neighbourOrder: slot.sort_order },
+      before:    { sort_order: swap.slotB.sort_order, neighbour: swap.slotB.id, neighbourOrder: swap.slotA.sort_order },
+      after:     { sort_order: swap.slotA.sort_order, neighbour: swap.slotB.id, neighbourOrder: swap.slotB.sort_order },
       who:       displayName || "anon",
     });
   }
@@ -255,7 +202,7 @@ export default function Stag({ slug }: { slug: string }) {
       m.set(s.day, list);
     }
     return m;
-  }, [bundle]);
+  }, [bundle?.slots]);
 
   const slotStates = useMemo(() => {
     if (!bundle) return new Map<string, Map<string, "past" | "now" | "future">>();
@@ -265,7 +212,7 @@ export default function Stag({ slug }: { slug: string }) {
       all.set(d.id, d.id === todayId ? slotStateMap(bundle.slots, d.id, now) : new Map());
     }
     return all;
-  }, [bundle, now]);
+  }, [bundle?.days, bundle?.slots, now]);
 
   if (error)   return <div style={{ padding: 24 }}>Failed to load: {error}</div>;
   if (!bundle) return <div style={{ padding: 24 }}>Loading…</div>;
