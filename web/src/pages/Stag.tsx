@@ -1,6 +1,7 @@
 import { useEffect, useState, useMemo } from "react";
 import { useStagData } from "../lib/useStagData";
 import { useEditHistory } from "../lib/useEditHistory";
+import { usePresence } from "../lib/usePresence";
 import { determineTripState, findTodayDayId, formatTMinus, slotStateMap } from "../lib/time";
 import Header from "../components/Header";
 import DayTabs from "../components/DayTabs";
@@ -49,6 +50,7 @@ export default function Stag({ slug }: { slug: string }) {
 
   const edits = useEditHistory(bundle?.stag.id);
   const lastEdit = edits[0];
+  const viewers = usePresence(bundle?.stag.id, displayName);
 
   async function handleUndo() {
     if (!lastEdit || !bundle) return;
@@ -276,6 +278,7 @@ export default function Stag({ slug }: { slug: string }) {
         onToggleEdit={handleToggleEdit}
         lastEdit={lastEdit}
         onUndo={editing ? handleUndo : undefined}
+        viewers={viewers}
       />
       <DayTabs
         days={bundle.days}

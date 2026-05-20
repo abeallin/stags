@@ -1,4 +1,5 @@
-import type { Stag, Edit } from "../lib/types";
+import type { Stag, Edit, PresenceRow } from "../lib/types";
+import Presence from "./Presence";
 
 interface Props {
   stag: Stag;
@@ -7,6 +8,7 @@ interface Props {
   onToggleEdit: () => void;
   lastEdit?: Edit;
   onUndo?: () => void;
+  viewers?: PresenceRow[];
 }
 
 function describe(e: Edit): string {
@@ -26,7 +28,7 @@ function ago(iso: string): string {
   return `${Math.round(h / 24)}d ago`;
 }
 
-export default function Header({ stag, tripBadge, editing, onToggleEdit, lastEdit, onUndo }: Props) {
+export default function Header({ stag, tripBadge, editing, onToggleEdit, lastEdit, onUndo, viewers }: Props) {
   return (
     <header className="header">
       <button className={`edit-toggle${editing ? " active" : ""}`} onClick={onToggleEdit}>
@@ -36,6 +38,7 @@ export default function Header({ stag, tripBadge, editing, onToggleEdit, lastEdi
       <h1>{stag.name}</h1>
       {tripBadge && <div className="trip-badge">{tripBadge}</div>}
       <div className="header-meta" dangerouslySetInnerHTML={{ __html: stag.header_meta_html }} />
+      {viewers && <Presence viewers={viewers} />}
       {lastEdit && (
         <div className="undo-bar">
           Last: {describe(lastEdit)} · {ago(lastEdit.created)}
