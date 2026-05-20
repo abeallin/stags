@@ -15,7 +15,6 @@ export default function Stag({ slug }: { slug: string }) {
   const [editing, setEditing] = useState(false);
   const [showGate, setShowGate] = useState(false);
   const [displayName, setDisplayName] = useState<string>(localStorage.getItem("stags.displayName") ?? "");
-  void displayName; // used by PassphraseGate onAuthed callback in Task 17
 
   useEffect(() => {
     const id = setInterval(() => setNow(new Date()), 30_000);
@@ -45,6 +44,57 @@ export default function Stag({ slug }: { slug: string }) {
     document.body.classList.toggle("editing", editing);
     return () => document.body.classList.remove("editing");
   }, [editing]);
+
+  async function handleSlotSave(slotId: string, patch: Partial<import("../lib/types").Slot>) {
+    if (!bundle) return;
+    const before = bundle.slots.find(s => s.id === slotId);
+    await pb.collection("slots").update(slotId, patch);
+    await pb.collection("edits").create({
+      stag:      bundle.stag.id,
+      kind:      "slot.update",
+      target_id: slotId,
+      before,
+      after:     { ...before, ...patch },
+      who:       displayName || "anon",
+    });
+  }
+
+  async function handleSlotDelete(slotId: string) {
+    if (!bundle) return;
+    const before = bundle.slots.find(s => s.id === slotId);
+    await pb.collection("slots").delete(slotId);
+    await pb.collection("edits").create({
+      stag:      bundle.stag.id,
+      kind:      "slot.delete",
+      target_id: slotId,
+      before,
+      after:     null,
+      who:       displayName || "anon",
+    });
+  }
+
+  async function handleSlotMove(slotId: string, direction: "up" | "down") {
+    if (!bundle) return;
+    const slot = bundle.slots.find(s => s.id === slotId);
+    if (!slot) return;
+    const daySlots = bundle.slots
+      .filter(s => s.day === slot.day)
+      .sort((a, b) => a.sort_order - b.sort_order);
+    const idx = daySlots.findIndex(s => s.id === slotId);
+    const targetIdx = direction === "up" ? idx - 1 : idx + 1;
+    if (targetIdx < 0 || targetIdx >= daySlots.length) return;
+    const neighbour = daySlots[targetIdx];
+    await pb.collection("slots").update(slot.id,      { sort_order: neighbour.sort_order });
+    await pb.collection("slots").update(neighbour.id, { sort_order: slot.sort_order });
+    await pb.collection("edits").create({
+      stag:      bundle.stag.id,
+      kind:      "slot.reorder",
+      target_id: slotId,
+      before:    { sort_order: slot.sort_order, neighbour: neighbour.id, neighbourOrder: neighbour.sort_order },
+      after:     { sort_order: neighbour.sort_order, neighbour: neighbour.id, neighbourOrder: slot.sort_order },
+      who:       displayName || "anon",
+    });
+  }
 
   function handleToggleEdit() {
     if (editing) {
@@ -107,6 +157,9 @@ export default function Stag({ slug }: { slug: string }) {
           slots={slotsByDay.get(d.id) ?? []}
           active={d.id === activeDayId}
           slotStates={slotStates.get(d.id)}
+          onSlotSave={editing ? handleSlotSave : undefined}
+          onSlotDelete={editing ? handleSlotDelete : undefined}
+          onSlotMove={editing ? handleSlotMove : undefined}
         />
       ))}
       {showGate && (
