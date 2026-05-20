@@ -1,0 +1,782 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="BCN Stag">
+<meta name="theme-color" content="#1a1a1a">
+<title>BCN Stag · 3–7 June 2026</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,500;0,9..144,700;1,9..144,400&family=Inter+Tight:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #f4ede1;
+    --bg-alt: #ebe1d0;
+    --bg-card: #fffaf0;
+    --ink: #1a1a1a;
+    --ink-soft: #5c5044;
+    --ink-faint: #8a7d6c;
+    --accent: #c84a2c;
+    --accent-soft: #e8d5b7;
+    --line: rgba(26, 26, 26, 0.12);
+    --line-strong: rgba(26, 26, 26, 0.25);
+    --done: #6b8e23;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+
+  html { -webkit-text-size-adjust: 100%; }
+
+  body {
+    font-family: 'Inter Tight', -apple-system, BlinkMacSystemFont, sans-serif;
+    background: var(--bg);
+    color: var(--ink);
+    line-height: 1.5;
+    font-size: 15px;
+    overflow-x: hidden;
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+
+  .container {
+    max-width: 520px;
+    margin: 0 auto;
+    padding: 0;
+    min-height: 100vh;
+  }
+
+  /* HEADER */
+  .header {
+    padding: 32px 24px 20px;
+    background: var(--ink);
+    color: var(--bg);
+    position: relative;
+    overflow: hidden;
+  }
+  .header::before {
+    content: '';
+    position: absolute;
+    top: -20px; right: -20px;
+    width: 180px; height: 180px;
+    border: 1px solid rgba(232, 213, 183, 0.2);
+    border-radius: 50%;
+    pointer-events: none;
+  }
+  .header::after {
+    content: '';
+    position: absolute;
+    top: 10px; right: 10px;
+    width: 120px; height: 120px;
+    border: 1px solid rgba(232, 213, 183, 0.15);
+    border-radius: 50%;
+    pointer-events: none;
+  }
+  .header-eyebrow {
+    font-family: 'Inter Tight', sans-serif;
+    font-size: 11px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--accent-soft);
+    font-weight: 500;
+    margin-bottom: 12px;
+    position: relative;
+  }
+  .header h1 {
+    font-family: 'Fraunces', serif;
+    font-weight: 300;
+    font-size: 48px;
+    line-height: 0.95;
+    letter-spacing: -0.02em;
+    margin-bottom: 16px;
+    position: relative;
+  }
+  .header h1 em {
+    font-style: italic;
+    font-weight: 400;
+    color: var(--accent-soft);
+  }
+  .header-meta {
+    font-size: 13px;
+    color: rgba(244, 237, 225, 0.7);
+    line-height: 1.7;
+    position: relative;
+  }
+  .header-meta strong { color: var(--bg); font-weight: 500; }
+
+  /* TABS */
+  .tabs {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 0;
+    background: var(--ink);
+    padding: 0 24px 24px;
+    position: sticky;
+    top: 0;
+    z-index: 10;
+  }
+  .tab {
+    background: transparent;
+    border: 1px solid rgba(232, 213, 183, 0.2);
+    border-right: none;
+    color: var(--accent-soft);
+    padding: 14px 4px 12px;
+    font-family: 'Inter Tight', sans-serif;
+    font-size: 11px;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+    position: relative;
+  }
+  .tab:last-child { border-right: 1px solid rgba(232, 213, 183, 0.2); }
+  .tab:first-child { border-top-left-radius: 4px; border-bottom-left-radius: 4px; }
+  .tab:last-child { border-top-right-radius: 4px; border-bottom-right-radius: 4px; }
+  .tab .day-num { display: block; font-family: 'Fraunces', serif; font-size: 22px; font-weight: 400; font-style: italic; letter-spacing: 0; margin-top: 4px; color: var(--bg); text-transform: none; }
+  .tab.active { background: var(--accent); color: var(--bg); border-color: var(--accent); }
+  .tab.active .day-num { color: var(--bg); }
+
+  /* DAY CONTENT */
+  .day-section { display: none; padding: 24px; }
+  .day-section.active { display: block; animation: fadeIn 0.3s ease-out; }
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: translateY(0); } }
+
+  .day-heading {
+    margin-bottom: 24px;
+    padding-bottom: 20px;
+    border-bottom: 1px solid var(--line);
+  }
+  .day-date {
+    font-family: 'Fraunces', serif;
+    font-weight: 400;
+    font-style: italic;
+    font-size: 14px;
+    color: var(--ink-faint);
+    letter-spacing: 0.5px;
+    margin-bottom: 4px;
+  }
+  .day-title {
+    font-family: 'Fraunces', serif;
+    font-weight: 400;
+    font-size: 32px;
+    line-height: 1.1;
+    letter-spacing: -0.01em;
+    margin-bottom: 12px;
+  }
+  .day-title em { font-style: italic; color: var(--accent); }
+  .day-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    align-items: center;
+  }
+  .pill {
+    display: inline-block;
+    font-size: 11px;
+    padding: 3px 10px;
+    border-radius: 20px;
+    font-weight: 500;
+    letter-spacing: 0.3px;
+    border: 1px solid var(--line-strong);
+    color: var(--ink-soft);
+    background: var(--bg-alt);
+  }
+  .pill-headline {
+    background: var(--accent);
+    color: var(--bg);
+    border-color: var(--accent);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    font-size: 10px;
+  }
+
+  /* SLOTS */
+  .slot {
+    background: var(--bg-card);
+    border: 1px solid var(--line);
+    border-radius: 4px;
+    padding: 18px;
+    margin-bottom: 12px;
+    position: relative;
+  }
+  .slot.featured {
+    border: 1px solid var(--accent);
+    background: var(--bg-card);
+    box-shadow: 4px 4px 0 var(--accent);
+  }
+  .slot-tag {
+    display: inline-block;
+    font-size: 10px;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    font-weight: 500;
+    color: var(--bg);
+    background: var(--accent);
+    padding: 3px 10px;
+    border-radius: 20px;
+    margin-bottom: 10px;
+  }
+  .slot-time {
+    font-family: 'Fraunces', serif;
+    font-weight: 400;
+    font-style: italic;
+    font-size: 13px;
+    color: var(--ink-faint);
+    letter-spacing: 0.3px;
+    margin-bottom: 6px;
+  }
+  .slot-title {
+    font-family: 'Fraunces', serif;
+    font-weight: 500;
+    font-size: 19px;
+    line-height: 1.25;
+    margin-bottom: 8px;
+    letter-spacing: -0.01em;
+  }
+  .slot-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-bottom: 10px;
+  }
+  .tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 11px;
+    padding: 3px 8px;
+    border-radius: 3px;
+    font-weight: 500;
+    background: var(--accent-soft);
+    color: var(--ink);
+  }
+  .tag-walk { background: #d4e4d0; color: #2d4a25; }
+  .tag-taxi { background: #f0d8b0; color: #5c4220; }
+  .tag-train { background: #d0d8e8; color: #2a3a55; }
+  .tag-must { background: var(--accent); color: var(--bg); }
+  .slot-note {
+    font-size: 14px;
+    line-height: 1.55;
+    color: var(--ink-soft);
+    margin-bottom: 10px;
+  }
+  .slot-note:last-of-type { margin-bottom: 14px; }
+  .slot-note strong { color: var(--ink); font-weight: 500; }
+  .slot-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-top: 10px;
+  }
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 12px;
+    padding: 7px 12px;
+    border: 1px solid var(--line-strong);
+    background: var(--bg);
+    color: var(--ink);
+    text-decoration: none;
+    border-radius: 3px;
+    font-weight: 500;
+    transition: all 0.15s;
+    cursor: pointer;
+    font-family: inherit;
+  }
+  .btn:hover, .btn:active { background: var(--ink); color: var(--bg); border-color: var(--ink); }
+  .btn svg { width: 12px; height: 12px; }
+
+  /* CHECKLIST */
+  .section-divider {
+    margin-top: 32px;
+    padding-top: 24px;
+    border-top: 1px solid var(--line);
+  }
+  .section-divider:first-child { margin-top: 0; border-top: none; padding-top: 0; }
+  .section-eyebrow {
+    font-size: 11px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--accent);
+    font-weight: 500;
+    margin-bottom: 6px;
+  }
+  .section-title {
+    font-family: 'Fraunces', serif;
+    font-weight: 400;
+    font-size: 24px;
+    margin-bottom: 16px;
+    letter-spacing: -0.01em;
+  }
+  .check-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 14px 16px;
+    background: var(--bg-card);
+    border: 1px solid var(--line);
+    border-radius: 4px;
+    margin-bottom: 8px;
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+  .check-item:active { transform: scale(0.99); }
+  .check-item.done { opacity: 0.5; background: var(--bg-alt); }
+  .check-item.done .check-label { text-decoration: line-through; }
+  .check-box {
+    width: 20px; height: 20px;
+    border-radius: 3px;
+    border: 1.5px solid var(--line-strong);
+    background: var(--bg);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    margin-top: 1px;
+    transition: all 0.15s;
+  }
+  .check-item.done .check-box { background: var(--done); border-color: var(--done); }
+  .check-box svg { width: 12px; height: 12px; stroke: var(--bg); stroke-width: 3; fill: none; opacity: 0; transition: opacity 0.15s; }
+  .check-item.done .check-box svg { opacity: 1; }
+  .check-content { flex: 1; }
+  .check-label {
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--ink);
+    line-height: 1.4;
+  }
+  .check-sub {
+    font-size: 12px;
+    color: var(--ink-faint);
+    margin-top: 3px;
+  }
+
+  /* REF CARDS */
+  .ref-card {
+    background: var(--bg-card);
+    border: 1px solid var(--line);
+    border-radius: 4px;
+    padding: 14px 16px;
+    margin-bottom: 8px;
+  }
+  .ref-title {
+    font-family: 'Fraunces', serif;
+    font-weight: 500;
+    font-size: 15px;
+    margin-bottom: 4px;
+  }
+  .ref-body {
+    font-size: 13px;
+    color: var(--ink-soft);
+    line-height: 1.5;
+  }
+
+  /* FOOTER */
+  .footer {
+    text-align: center;
+    padding: 40px 24px 32px;
+    color: var(--ink-faint);
+    font-size: 11px;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+  }
+  .footer-mark {
+    font-family: 'Fraunces', serif;
+    font-style: italic;
+    font-size: 16px;
+    color: var(--accent);
+    text-transform: none;
+    letter-spacing: 0;
+    margin-bottom: 8px;
+    display: block;
+    font-weight: 400;
+  }
+
+  /* COUNTDOWN BANNER */
+  .countdown {
+    background: var(--accent);
+    color: var(--bg);
+    padding: 10px 24px;
+    font-size: 12px;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    text-align: center;
+    font-weight: 500;
+  }
+  .countdown-num {
+    font-family: 'Fraunces', serif;
+    font-style: italic;
+    font-size: 18px;
+    text-transform: none;
+    letter-spacing: 0;
+    font-weight: 400;
+  }
+
+  @media (max-width: 360px) {
+    .header h1 { font-size: 40px; }
+    .day-title { font-size: 28px; }
+    .tab { font-size: 10px; }
+  }
+</style>
+</head>
+<body>
+<div class="container">
+
+  <header class="header">
+    <div class="header-eyebrow">A Stag Affair</div>
+    <h1>Barcelona<br><em>2026</em></h1>
+    <div class="header-meta">
+      <strong>3–7 June</strong> · 5 lads building to 8<br>
+      Base: Quartprimera, Carrer del Rosselló 244
+    </div>
+  </header>
+
+  <div class="countdown" id="countdown">
+    <span class="countdown-num" id="countdown-num">—</span> days to go
+  </div>
+
+  <nav class="tabs" role="tablist">
+    <button class="tab active" data-day="wed">Wed<span class="day-num">3</span></button>
+    <button class="tab" data-day="thu">Thu<span class="day-num">4</span></button>
+    <button class="tab" data-day="fri">Fri<span class="day-num">5</span></button>
+    <button class="tab" data-day="sat">Sat<span class="day-num">6</span></button>
+    <button class="tab" data-day="sun">Sun<span class="day-num">7</span></button>
+  </nav>
+
+  <!-- WED -->
+  <section class="day-section active" data-day="wed">
+    <div class="day-heading">
+      <div class="day-date">Wednesday 3 June</div>
+      <h2 class="day-title">The <em>arrival</em></h2>
+      <div class="day-meta">
+        <span class="pill">5 lads</span>
+        <span class="pill">Easy first night</span>
+      </div>
+    </div>
+
+    <div class="slot">
+      <div class="slot-time">4:15pm · arrival</div>
+      <div class="slot-title">Land at BCN → apartment</div>
+      <p class="slot-note">Aerobús from T1/T2 to Plaça Catalunya · €7.25 · 35 min, then 10 min walk. Or split taxis ~€35 each.</p>
+    </div>
+
+    <div class="slot">
+      <div class="slot-time">8:00pm · dinner</div>
+      <div class="slot-title">Vivo Tapas</div>
+      <div class="slot-tags"><span class="tag tag-walk">3 min walk</span></div>
+      <p class="slot-note">★ 4.8 · 22k reviews. Low-effort first-night feed right by the apartment.</p>
+      <div class="slot-actions">
+        <a class="btn" href="https://maps.google.com/?cid=13177602170648384505" target="_blank" rel="noopener">Map</a>
+        <a class="btn" href="https://vivotapas.com/" target="_blank" rel="noopener">Website</a>
+      </div>
+    </div>
+
+    <div class="slot">
+      <div class="slot-time">10:00pm · cocktails</div>
+      <div class="slot-title">Paradiso speakeasy</div>
+      <div class="slot-tags"><span class="tag tag-walk">16 min walk</span></div>
+      <p class="slot-note">Enter through the pastrami fridge. Get there 9:30pm latest. One round, then El Born bars.</p>
+      <div class="slot-actions">
+        <a class="btn" href="https://maps.google.com/?cid=11787371834999161204" target="_blank" rel="noopener">Map</a>
+        <a class="btn" href="https://paradiso.cat/" target="_blank" rel="noopener">Website</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- THU -->
+  <section class="day-section" data-day="thu">
+    <div class="day-heading">
+      <div class="day-date">Thursday 4 June</div>
+      <h2 class="day-title"><em>Primavera</em> night</h2>
+      <div class="day-meta">
+        <span class="pill">7 lads</span>
+        <span class="pill pill-headline">Festival</span>
+      </div>
+    </div>
+
+    <div class="slot">
+      <div class="slot-time">11:00am · coffee + sights</div>
+      <div class="slot-title">Ripa Coffee + Passeig de Gràcia stroll</div>
+      <div class="slot-tags"><span class="tag tag-walk">8 min walk</span></div>
+      <p class="slot-note">★ 4.9 coffee. Walk Passeig de Gràcia, photo at Casa Batlló & La Pedrera. Sleep-in friendly.</p>
+      <div class="slot-actions">
+        <a class="btn" href="https://maps.google.com/?cid=16601903211269173757" target="_blank" rel="noopener">Map</a>
+      </div>
+    </div>
+
+    <div class="slot">
+      <div class="slot-time">1:00pm · tapas lunch</div>
+      <div class="slot-title">Cervecería Catalana</div>
+      <div class="slot-tags"><span class="tag tag-walk">5 min walk</span></div>
+      <p class="slot-note">★ 4.4 · 24k reviews. The 2 latecomers join here. Then back to apartment for a nap.</p>
+      <div class="slot-actions">
+        <a class="btn" href="https://maps.google.com/?cid=7860387390770853690" target="_blank" rel="noopener">Map</a>
+      </div>
+    </div>
+
+    <div class="slot featured">
+      <div class="slot-tag">The main event</div>
+      <div class="slot-time">5:30pm → 5am · festival</div>
+      <div class="slot-title">Primavera Sound at Parc del Fòrum</div>
+      <div class="slot-tags"><span class="tag tag-train">L4 metro</span></div>
+      <p class="slot-note"><strong>Thu headliners:</strong> Doja Cat, Massive Attack, Bad Gyal. Gates open ~4pm. Runs to 5am. Metro L4 to El Maresme/Fòrum — easier than taxis (festival traffic is hell).</p>
+      <p class="slot-note"><strong>Bring:</strong> ticket on phone + battery pack + cash card + sunglasses + jumper for late. Lockers on site.</p>
+      <div class="slot-actions">
+        <a class="btn" href="https://www.primaverasound.com/en/barcelona" target="_blank" rel="noopener">Festival site</a>
+        <a class="btn" href="https://clashfinder.com/m/ps26/" target="_blank" rel="noopener">Clashfinder</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- FRI -->
+  <section class="day-section" data-day="fri">
+    <div class="day-heading">
+      <div class="day-date">Friday 5 June</div>
+      <h2 class="day-title">Beach <em>recovery</em></h2>
+      <div class="day-meta">
+        <span class="pill">8 lads (full crew)</span>
+        <span class="pill">Pure hangover mode</span>
+      </div>
+    </div>
+
+    <div class="slot">
+      <div class="slot-time">12:00pm · late brunch</div>
+      <div class="slot-title">Faire. Brunch & Drinks</div>
+      <div class="slot-tags"><span class="tag tag-walk">7 min walk</span></div>
+      <p class="slot-note">★ 4.8. Sleep-in friendly start. Sourdough avo eggs, fresh juices. Last lad joins here.</p>
+      <div class="slot-actions">
+        <a class="btn" href="https://maps.google.com/?cid=13909965794466410091" target="_blank" rel="noopener">Map</a>
+      </div>
+    </div>
+
+    <div class="slot featured">
+      <div class="slot-tag">Recovery</div>
+      <div class="slot-time">2:00pm · beach day</div>
+      <div class="slot-title">Barceloneta beach</div>
+      <div class="slot-tags"><span class="tag tag-taxi">8 min taxi</span></div>
+      <p class="slot-note">Pure hangover medicine. Find a chiringuito, beers and cervezas, nap on the sand, swim when you can muster it. Zero pressure, zero schedule.</p>
+    </div>
+
+    <div class="slot">
+      <div class="slot-time">8:30pm · paella dinner</div>
+      <div class="slot-title">Xiringuito Escribà</div>
+      <div class="slot-tags"><span class="tag tag-walk">10 min along beach</span><span class="tag tag-must">Book ahead</span></div>
+      <p class="slot-note">Beachfront paella, ~10 min walk up the seafront from Barceloneta. Reservation essential for 8.</p>
+      <div class="slot-actions">
+        <a class="btn" href="https://maps.google.com/?cid=11670256638466811660" target="_blank" rel="noopener">Map</a>
+        <a class="btn" href="https://restaurantsescriba.com/" target="_blank" rel="noopener">Website</a>
+      </div>
+    </div>
+
+    <div class="slot">
+      <div class="slot-time">11:00pm · optional drinks</div>
+      <div class="slot-title">El Born cocktail crawl (if game)</div>
+      <p class="slot-note">Bestiari → Mariposa Negra → Especiarium. All within 3 min of each other. Or just home — Saturday's a proper day.</p>
+    </div>
+  </section>
+
+  <!-- SAT -->
+  <section class="day-section" data-day="sat">
+    <div class="day-heading">
+      <div class="day-date">Saturday 6 June</div>
+      <h2 class="day-title">Sitges + <em>the finale</em></h2>
+      <div class="day-meta">
+        <span class="pill">8 lads</span>
+        <span class="pill">Half-day escape</span>
+        <span class="pill pill-headline">Big finish</span>
+      </div>
+    </div>
+
+    <div class="slot featured">
+      <div class="slot-tag">The day trip</div>
+      <div class="slot-time">10:30am · train south</div>
+      <div class="slot-title">R2 Sud → Sitges</div>
+      <div class="slot-tags"><span class="tag tag-train">3 min walk to station</span></div>
+      <p class="slot-note">€5 each way · 35–40 min · runs every 15–20 min from Passeig de Gràcia. Sit on the top deck, left side, for coastal views. Station is 10 min walk to the beach.</p>
+    </div>
+
+    <div class="slot">
+      <div class="slot-time">12:00pm · arrive + beach</div>
+      <div class="slot-title">San Sebastián beach</div>
+      <p class="slot-note">Smaller, less crowded than the main strip. Walk the promenade, find a spot, swim, lounge.</p>
+    </div>
+
+    <div class="slot">
+      <div class="slot-time">1:30pm · seafront lunch</div>
+      <div class="slot-title">Beachfront chiringuito</div>
+      <p class="slot-note">La Punta, Fragata, or any spot on Passeig de la Ribera. Paella, fresh fish, sangria. Pintxos at Izarra Taberna Vasca on Carrer Major if you want to bar-graze.</p>
+    </div>
+
+    <div class="slot featured">
+      <div class="slot-tag">The boat</div>
+      <div class="slot-time">3:30pm · sailing tour</div>
+      <div class="slot-title">Sitges sail with cava</div>
+      <div class="slot-tags"><span class="tag tag-must">Book ahead</span></div>
+      <p class="slot-note">~1.5–2hrs, ~€30–50pp. Sail along the Sitges coast with cava. Book Wed/Thu on GetYourGuide — Saturdays in June sell out.</p>
+      <div class="slot-actions">
+        <a class="btn" href="https://www.getyourguide.com/sitges-l1100/" target="_blank" rel="noopener">GetYourGuide</a>
+      </div>
+    </div>
+
+    <div class="slot">
+      <div class="slot-time">6:30pm · train back</div>
+      <div class="slot-title">R2 Sud → Passeig de Gràcia</div>
+      <p class="slot-note">Back at apartment ~7:15pm. Quick shower, change, big night incoming.</p>
+    </div>
+
+    <div class="slot featured">
+      <div class="slot-tag">Stag dinner</div>
+      <div class="slot-time">9:30pm · the big meal</div>
+      <div class="slot-title">Bar Cañete</div>
+      <div class="slot-tags"><span class="tag tag-taxi">8 min taxi</span><span class="tag tag-must">Book weeks ahead</span></div>
+      <p class="slot-note">★ 4.6 · 8k reviews. The centrepiece. Squid sandwich, croquetas, ox-tail bun.</p>
+      <div class="slot-actions">
+        <a class="btn" href="https://maps.google.com/?cid=2051304937619323747" target="_blank" rel="noopener">Map</a>
+        <a class="btn" href="http://www.barcanete.com/" target="_blank" rel="noopener">Reserve</a>
+      </div>
+    </div>
+
+    <div class="slot">
+      <div class="slot-time">midnight · final blow-out</div>
+      <div class="slot-title">El Born cocktails → Opium</div>
+      <p class="slot-note">Bestiari → Mariposa Negra → taxi to Opium beach club. Last big night, send him off properly.</p>
+      <div class="slot-actions">
+        <a class="btn" href="https://maps.google.com/?cid=7377834779619128855" target="_blank" rel="noopener">Bestiari</a>
+        <a class="btn" href="https://maps.google.com/?cid=15803368006927918052" target="_blank" rel="noopener">Opium</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- SUN -->
+  <section class="day-section" data-day="sun">
+    <div class="day-heading">
+      <div class="day-date">Sunday 7 June</div>
+      <h2 class="day-title">Home <em>bound</em></h2>
+      <div class="day-meta">
+        <span class="pill">Flight 2pm</span>
+      </div>
+    </div>
+
+    <div class="slot">
+      <div class="slot-time">9:00am · checkout</div>
+      <div class="slot-title">Pack + bags down</div>
+      <p class="slot-note">Don't leave valuables in rooms during cleaning. Reception can hold bags if needed.</p>
+    </div>
+
+    <div class="slot">
+      <div class="slot-time">10:00am · brunch</div>
+      <div class="slot-title">Faire or Ripa · coffee + croissant</div>
+      <p class="slot-note">Light, fast, hangover-friendly. Close to base.</p>
+    </div>
+
+    <div class="slot">
+      <div class="slot-time">11:00am · airport</div>
+      <div class="slot-title">Aerobús from Plaça Catalunya</div>
+      <p class="slot-note">10 min walk · €7.25 · every 5–10 min · 35 min to BCN. Flight 2pm.</p>
+    </div>
+  </section>
+
+  <!-- CHECKLIST + REFERENCE -->
+  <div style="padding: 0 24px;">
+    <div class="section-divider">
+      <div class="section-eyebrow">Bookings</div>
+      <h3 class="section-title">Lock these in</h3>
+      <div id="checklist"></div>
+    </div>
+
+    <div class="section-divider">
+      <div class="section-eyebrow">Reference</div>
+      <h3 class="section-title">On the day</h3>
+
+      <div class="ref-card">
+        <div class="ref-title">Apartment</div>
+        <div class="ref-body">Quartprimera, Carrer del Rosselló 244 · <a href="tel:+34606864137" style="color: var(--accent);">+34 606 86 41 37</a></div>
+      </div>
+      <div class="ref-card">
+        <div class="ref-title">Primavera → Parc del Fòrum</div>
+        <div class="ref-body">L4 metro to El Maresme/Fòrum. Way easier than taxis.</div>
+      </div>
+      <div class="ref-card">
+        <div class="ref-title">Sitges train</div>
+        <div class="ref-body">R2 Sud from Passeig de Gràcia · €5 each way · every 15–20 min · last train ~10:30pm.</div>
+      </div>
+      <div class="ref-card">
+        <div class="ref-title">Taxi apps</div>
+        <div class="ref-body">Free Now, Bolt, Cabify. Uber limited. Cab ranks on Passeig de Gràcia & Diagonal.</div>
+      </div>
+      <div class="ref-card">
+        <div class="ref-title">Cash</div>
+        <div class="ref-body">Cards work everywhere. Bring €100 each for taxis, tips, festival lockers.</div>
+      </div>
+    </div>
+  </div>
+
+  <footer class="footer">
+    <span class="footer-mark">Hasta luego</span>
+    Save to home screen<br>for offline access
+  </footer>
+
+</div>
+
+<script>
+  // Tabs
+  const tabs = document.querySelectorAll('.tab');
+  const days = document.querySelectorAll('.day-section');
+  tabs.forEach(t => t.addEventListener('click', () => {
+    tabs.forEach(x => x.classList.remove('active'));
+    days.forEach(x => x.classList.remove('active'));
+    t.classList.add('active');
+    document.querySelector('.day-section[data-day="' + t.dataset.day + '"]').classList.add('active');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }));
+
+  // Countdown
+  function updateCountdown() {
+    const trip = new Date('2026-06-03T16:15:00');
+    const now = new Date();
+    const diff = trip - now;
+    const days = Math.ceil(diff / (1000 * 60 * 60 * 24));
+    const el = document.getElementById('countdown-num');
+    const banner = document.getElementById('countdown');
+    if (days > 1) { el.textContent = days; }
+    else if (days === 1) { el.textContent = '1'; banner.innerHTML = '<span class="countdown-num">1</span> day to go'; }
+    else if (days === 0) { banner.innerHTML = '<span class="countdown-num">It\'s today</span>'; }
+    else if (days < 0 && days >= -4) { banner.innerHTML = '<span class="countdown-num">Currently in Barcelona</span>'; }
+    else { banner.style.display = 'none'; }
+  }
+  updateCountdown();
+
+  // Checklist
+  const checklist = [
+    { id: 'primavera', label: 'Primavera Thursday tickets', sub: 'Confirm all 7 lads have them — festival sold out' },
+    { id: 'apt', label: 'Apartment confirmed for 5→8 headcount', sub: 'Notify Quartprimera of mid-stay change' },
+    { id: 'can', label: 'Bar Cañete reservation — Sat 9:30pm', sub: 'Group of 8, book weeks ahead' },
+    { id: 'xir', label: 'Xiringuito Escribà — Fri 8:30pm dinner', sub: 'Beachfront paella for 8' },
+    { id: 'sail', label: 'Sitges sailing tour — Sat afternoon', sub: 'GetYourGuide, book Wed/Thu' },
+    { id: 'opi', label: 'Opium guest list — Sat night', sub: 'opiumbarcelona.com before midnight' },
+    { id: 'fli', label: 'Flights — outbound + return shared', sub: 'Each lad sends details to the group' },
+    { id: 'cash', label: 'Everyone has €100 cash', sub: 'Taxis, tips, festival lockers' }
+  ];
+
+  let saved = {};
+  try { saved = JSON.parse(localStorage.getItem('bcn-stag-checks') || '{}'); } catch(e) {}
+
+  const cl = document.getElementById('checklist');
+  checklist.forEach(item => {
+    const done = !!saved[item.id];
+    const el = document.createElement('div');
+    el.className = 'check-item' + (done ? ' done' : '');
+    el.innerHTML = '<div class="check-box"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"></polyline></svg></div><div class="check-content"><div class="check-label">' + item.label + '</div><div class="check-sub">' + item.sub + '</div></div>';
+    el.addEventListener('click', () => {
+      saved[item.id] = !saved[item.id];
+      try { localStorage.setItem('bcn-stag-checks', JSON.stringify(saved)); } catch(e) {}
+      el.classList.toggle('done');
+    });
+    cl.appendChild(el);
+  });
+</script>
+</body>
+</html>

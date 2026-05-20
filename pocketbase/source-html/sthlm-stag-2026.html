@@ -1,0 +1,774 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="STHLM Stag">
+<meta name="theme-color" content="#0f1419">
+<title>Stockholm Stag · 11–14 June 2026</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #f5f3ee;
+    --bg-alt: #e8e4d8;
+    --bg-card: #ffffff;
+    --ink: #0f1419;
+    --ink-soft: #4a5159;
+    --ink-faint: #7d8590;
+    --accent: #2c5f7c;
+    --accent-bright: #4a90b8;
+    --accent-soft: #d4e5ef;
+    --line: rgba(15, 20, 25, 0.1);
+    --line-strong: rgba(15, 20, 25, 0.22);
+    --done: #4a7c3f;
+    --warn: #b8761f;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+  html { -webkit-text-size-adjust: 100%; }
+
+  body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    background: var(--bg);
+    color: var(--ink);
+    line-height: 1.55;
+    font-size: 15px;
+    overflow-x: hidden;
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+
+  .container { max-width: 520px; margin: 0 auto; min-height: 100vh; }
+
+  /* HEADER */
+  .header {
+    padding: 36px 24px 24px;
+    background: var(--ink);
+    color: var(--bg);
+    position: relative;
+    overflow: hidden;
+  }
+  .header::before {
+    content: '';
+    position: absolute;
+    top: -40px; right: -40px;
+    width: 220px; height: 220px;
+    border: 1px solid rgba(212, 229, 239, 0.15);
+    border-radius: 50%;
+    pointer-events: none;
+  }
+  .header::after {
+    content: '◆ ◆ ◆';
+    position: absolute;
+    bottom: 20px; right: 24px;
+    font-size: 10px;
+    letter-spacing: 4px;
+    color: var(--accent-bright);
+    pointer-events: none;
+  }
+  .header-eyebrow {
+    font-size: 11px;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: var(--accent-bright);
+    font-weight: 500;
+    margin-bottom: 14px;
+    position: relative;
+  }
+  .header h1 {
+    font-family: 'Instrument Serif', Georgia, serif;
+    font-weight: 400;
+    font-size: 52px;
+    line-height: 0.95;
+    letter-spacing: -0.01em;
+    margin-bottom: 18px;
+    position: relative;
+  }
+  .header h1 em {
+    font-style: italic;
+    color: var(--accent-bright);
+  }
+  .header-meta {
+    font-size: 13px;
+    color: rgba(245, 243, 238, 0.7);
+    line-height: 1.7;
+    position: relative;
+  }
+  .header-meta strong { color: var(--bg); font-weight: 500; }
+
+  /* COUNTDOWN */
+  .countdown {
+    background: var(--accent);
+    color: var(--bg);
+    padding: 12px 24px;
+    font-size: 11px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    text-align: center;
+    font-weight: 500;
+  }
+  .countdown-num {
+    font-family: 'Instrument Serif', serif;
+    font-style: italic;
+    font-size: 20px;
+    text-transform: none;
+    letter-spacing: 0;
+    font-weight: 400;
+  }
+
+  /* TABS */
+  .tabs {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 0;
+    background: var(--bg-alt);
+    padding: 0;
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    border-bottom: 1px solid var(--line);
+  }
+  .tab {
+    background: transparent;
+    border: none;
+    border-right: 1px solid var(--line);
+    color: var(--ink-soft);
+    padding: 16px 4px 14px;
+    font-size: 10px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+    font-family: inherit;
+  }
+  .tab:last-child { border-right: none; }
+  .tab .day-num {
+    display: block;
+    font-family: 'Instrument Serif', serif;
+    font-size: 24px;
+    font-weight: 400;
+    font-style: italic;
+    letter-spacing: 0;
+    margin-top: 4px;
+    color: var(--ink);
+    text-transform: none;
+  }
+  .tab.active { background: var(--bg-card); color: var(--accent); }
+  .tab.active .day-num { color: var(--accent); }
+
+  /* DAY CONTENT */
+  .day-section { display: none; padding: 28px 24px; background: var(--bg-card); }
+  .day-section.active { display: block; animation: fadeIn 0.3s; }
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: translateY(0); } }
+
+  .day-heading {
+    margin-bottom: 28px;
+    padding-bottom: 22px;
+    border-bottom: 1px solid var(--line);
+    position: relative;
+  }
+  .day-date {
+    font-family: 'Instrument Serif', serif;
+    font-weight: 400;
+    font-style: italic;
+    font-size: 14px;
+    color: var(--ink-faint);
+    margin-bottom: 4px;
+  }
+  .day-title {
+    font-family: 'Instrument Serif', serif;
+    font-weight: 400;
+    font-size: 36px;
+    line-height: 1.05;
+    letter-spacing: -0.01em;
+    margin-bottom: 14px;
+  }
+  .day-title em { font-style: italic; color: var(--accent); }
+  .day-meta { display: flex; flex-wrap: wrap; gap: 6px; }
+  .pill {
+    display: inline-block;
+    font-size: 11px;
+    padding: 4px 11px;
+    border-radius: 2px;
+    font-weight: 500;
+    letter-spacing: 0.3px;
+    border: 1px solid var(--line-strong);
+    color: var(--ink-soft);
+    background: var(--bg);
+  }
+  .pill-headline {
+    background: var(--accent);
+    color: var(--bg);
+    border-color: var(--accent);
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    font-size: 10px;
+  }
+  .pill-warn {
+    background: var(--warn);
+    color: var(--bg);
+    border-color: var(--warn);
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    font-size: 10px;
+  }
+
+  /* SLOTS */
+  .slot {
+    background: var(--bg);
+    border: 1px solid var(--line);
+    border-radius: 2px;
+    padding: 18px 20px;
+    margin-bottom: 12px;
+    position: relative;
+  }
+  .slot.featured {
+    background: var(--bg-card);
+    border-left: 3px solid var(--accent);
+    padding-left: 18px;
+  }
+  .slot-tag {
+    display: inline-block;
+    font-size: 10px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    font-weight: 500;
+    color: var(--bg);
+    background: var(--accent);
+    padding: 3px 11px;
+    border-radius: 2px;
+    margin-bottom: 12px;
+  }
+  .slot-time {
+    font-family: 'Instrument Serif', serif;
+    font-weight: 400;
+    font-style: italic;
+    font-size: 14px;
+    color: var(--ink-faint);
+    margin-bottom: 6px;
+  }
+  .slot-title {
+    font-family: 'Instrument Serif', serif;
+    font-weight: 400;
+    font-size: 22px;
+    line-height: 1.2;
+    margin-bottom: 10px;
+    letter-spacing: -0.01em;
+  }
+  .slot-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-bottom: 12px;
+  }
+  .tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 11px;
+    padding: 3px 9px;
+    border-radius: 2px;
+    font-weight: 500;
+    background: var(--accent-soft);
+    color: var(--accent);
+  }
+  .tag-walk { background: #d8e8d0; color: #2d4a25; }
+  .tag-taxi { background: #f0e0c0; color: #5c4220; }
+  .tag-train { background: #d0d8e8; color: #2a3a55; }
+  .tag-boat { background: var(--accent-soft); color: var(--accent); }
+  .tag-must { background: var(--warn); color: var(--bg); }
+  .slot-note {
+    font-size: 14px;
+    line-height: 1.6;
+    color: var(--ink-soft);
+    margin-bottom: 10px;
+  }
+  .slot-note:last-of-type { margin-bottom: 14px; }
+  .slot-note strong { color: var(--ink); font-weight: 500; }
+  .slot-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-top: 12px;
+  }
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 12px;
+    padding: 8px 13px;
+    border: 1px solid var(--line-strong);
+    background: var(--bg-card);
+    color: var(--ink);
+    text-decoration: none;
+    border-radius: 2px;
+    font-weight: 500;
+    transition: all 0.15s;
+    font-family: inherit;
+    cursor: pointer;
+  }
+  .btn:hover, .btn:active { background: var(--ink); color: var(--bg); border-color: var(--ink); }
+
+  /* SECTIONS */
+  .section-divider {
+    margin-top: 36px;
+    padding-top: 28px;
+    border-top: 1px solid var(--line);
+  }
+  .section-eyebrow {
+    font-size: 11px;
+    letter-spacing: 2.5px;
+    text-transform: uppercase;
+    color: var(--accent);
+    font-weight: 500;
+    margin-bottom: 6px;
+  }
+  .section-title {
+    font-family: 'Instrument Serif', serif;
+    font-weight: 400;
+    font-size: 28px;
+    margin-bottom: 18px;
+    letter-spacing: -0.01em;
+  }
+
+  /* CHECKLIST */
+  .check-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 14px 16px;
+    background: var(--bg);
+    border: 1px solid var(--line);
+    border-radius: 2px;
+    margin-bottom: 8px;
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+  .check-item:active { transform: scale(0.99); }
+  .check-item.done { opacity: 0.5; background: var(--bg-alt); }
+  .check-item.done .check-label { text-decoration: line-through; }
+  .check-box {
+    width: 20px; height: 20px;
+    border-radius: 2px;
+    border: 1.5px solid var(--line-strong);
+    background: var(--bg-card);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    margin-top: 1px;
+    transition: all 0.15s;
+  }
+  .check-item.done .check-box { background: var(--done); border-color: var(--done); }
+  .check-box svg { width: 12px; height: 12px; stroke: var(--bg); stroke-width: 3; fill: none; opacity: 0; }
+  .check-item.done .check-box svg { opacity: 1; }
+  .check-content { flex: 1; }
+  .check-label { font-size: 14px; font-weight: 500; line-height: 1.4; }
+  .check-sub { font-size: 12px; color: var(--ink-faint); margin-top: 3px; }
+
+  /* REF CARDS */
+  .ref-card {
+    background: var(--bg);
+    border: 1px solid var(--line);
+    border-radius: 2px;
+    padding: 14px 16px;
+    margin-bottom: 8px;
+  }
+  .ref-card.alert { border-left: 3px solid var(--warn); }
+  .ref-title { font-family: 'Instrument Serif', serif; font-weight: 400; font-size: 17px; margin-bottom: 4px; }
+  .ref-body { font-size: 13px; color: var(--ink-soft); line-height: 1.55; }
+  .ref-body a { color: var(--accent); }
+
+  /* FOOTER */
+  .footer {
+    text-align: center;
+    padding: 44px 24px 36px;
+    color: var(--ink-faint);
+    font-size: 11px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+  }
+  .footer-mark {
+    font-family: 'Instrument Serif', serif;
+    font-style: italic;
+    font-size: 18px;
+    color: var(--accent);
+    text-transform: none;
+    letter-spacing: 0;
+    margin-bottom: 8px;
+    display: block;
+  }
+
+  @media (max-width: 360px) {
+    .header h1 { font-size: 42px; }
+    .day-title { font-size: 30px; }
+  }
+</style>
+</head>
+<body>
+<div class="container">
+
+  <header class="header">
+    <div class="header-eyebrow">Stag Affair № 2</div>
+    <h1>Stockholm<br><em>2026</em></h1>
+    <div class="header-meta">
+      <strong>11–14 June</strong> · 4–6 lads · 4 nights<br>
+      Base: Scandic, Norrmalm
+    </div>
+  </header>
+
+  <div class="countdown" id="countdown">
+    <span class="countdown-num" id="countdown-num">—</span> days to go
+  </div>
+
+  <nav class="tabs" role="tablist">
+    <button class="tab active" data-day="thu">Thu<span class="day-num">11</span></button>
+    <button class="tab" data-day="fri">Fri<span class="day-num">12</span></button>
+    <button class="tab" data-day="sat">Sat<span class="day-num">13</span></button>
+    <button class="tab" data-day="sun">Sun<span class="day-num">14</span></button>
+  </nav>
+
+  <!-- THU -->
+  <section class="day-section active" data-day="thu">
+    <div class="day-heading">
+      <div class="day-date">Thursday 11 June</div>
+      <h2 class="day-title">The <em>arrival</em></h2>
+      <div class="day-meta">
+        <span class="pill">Land ~2pm local</span>
+        <span class="pill">Old Town night</span>
+      </div>
+    </div>
+
+    <div class="slot">
+      <div class="slot-time">9–10am · LHR departure</div>
+      <div class="slot-title">Heathrow → Stockholm Arlanda</div>
+      <p class="slot-note">~2hr 40min flight + 1hr time difference = land ~1–2pm local. Arlanda Express train to Central Station (20 min, ~£26 return). Hotel is 2 min walk from there.</p>
+    </div>
+
+    <div class="slot">
+      <div class="slot-time">3:00pm · check in + walk</div>
+      <div class="slot-title">Scandic check-in → Old Town stroll</div>
+      <div class="slot-tags"><span class="tag tag-walk">15 min walk</span></div>
+      <p class="slot-note">Drop bags, then walk south to Gamla Stan (Old Town). Stortorget square, Mårten Trotzigs gränd (Stockholm's narrowest street — 90cm wide), the Royal Palace. Sets the scene.</p>
+      <div class="slot-actions">
+        <a class="btn" href="https://maps.google.com/?cid=5061824983680456332" target="_blank" rel="noopener">Stortorget</a>
+        <a class="btn" href="https://maps.google.com/?cid=8133603484823352182" target="_blank" rel="noopener">Narrow street</a>
+      </div>
+    </div>
+
+    <div class="slot featured">
+      <div class="slot-tag">First feed</div>
+      <div class="slot-time">7:30pm · Swedish classics</div>
+      <div class="slot-title">Lilla Gästabud</div>
+      <div class="slot-tags"><span class="tag tag-walk">Gamla Stan · 10 min</span><span class="tag tag-must">Book ahead</span></div>
+      <p class="slot-note">★ 4.9 · 582 reviews. Tiny intimate spot in Old Town — "the best meatball sauce I've ever tasted," "best meal we've had in a very long time." Reindeer meatballs, braised pork cheek, smoked fish. Small space — book in advance for a group of 4-6.</p>
+      <p class="slot-note"><strong>Backup if full:</strong> Stockholms Gästabud (the bigger sister, ★ 4.7 · 6,500 reviews).</p>
+      <div class="slot-actions">
+        <a class="btn" href="https://maps.google.com/?cid=8915148810498769866" target="_blank" rel="noopener">Lilla Gästabud</a>
+        <a class="btn" href="https://maps.google.com/?cid=14252948070317293264" target="_blank" rel="noopener">Backup</a>
+      </div>
+    </div>
+
+    <div class="slot">
+      <div class="slot-time">10:00pm · cocktails</div>
+      <div class="slot-title">Pharmarium</div>
+      <div class="slot-tags"><span class="tag tag-walk">Gamla Stan</span></div>
+      <p class="slot-note">★ 4.4 · 1,600 reviews. Theatrical apothecary-themed cocktail bar on Stortorget square. Smoke, potions, all the bits. Expensive but a proper experience.</p>
+      <div class="slot-actions">
+        <a class="btn" href="https://maps.google.com/?cid=12907423862175823033" target="_blank" rel="noopener">Map</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- FRI -->
+  <section class="day-section" data-day="fri">
+    <div class="day-heading">
+      <div class="day-date">Friday 12 June</div>
+      <h2 class="day-title">Sauna + <em>sights</em> + party</h2>
+      <div class="day-meta">
+        <span class="pill">The full day</span>
+        <span class="pill">Big night</span>
+      </div>
+    </div>
+
+    <div class="slot">
+      <div class="slot-time">9:00am · coffee + fika</div>
+      <div class="slot-title">Café Pascal</div>
+      <div class="slot-tags"><span class="tag tag-walk">10 min walk</span></div>
+      <p class="slot-note">★ 4.5 · 2,500 reviews. Best coffee shop in Stockholm right now. Cardamom buns, pistachio danishes, the proper Swedish fika morning.</p>
+      <div class="slot-actions">
+        <a class="btn" href="https://maps.google.com/?cid=13938935632050241102" target="_blank" rel="noopener">Map</a>
+      </div>
+    </div>
+
+    <div class="slot">
+      <div class="slot-time">10:30am · museum</div>
+      <div class="slot-title">Vasa Museum on Djurgården</div>
+      <div class="slot-tags"><span class="tag tag-train">20 min tram/ferry</span></div>
+      <p class="slot-note">★ 4.8 · 67,000 reviews. A 17th-century warship that sank on its maiden voyage, salvaged 333 years later, now in a custom museum. Genuinely jaw-dropping even if you don't do museums. Free audio guide app.</p>
+      <div class="slot-actions">
+        <a class="btn" href="https://maps.google.com/?cid=15001480060569842497" target="_blank" rel="noopener">Map</a>
+      </div>
+    </div>
+
+    <div class="slot featured">
+      <div class="slot-tag">The must-have</div>
+      <div class="slot-time">2:30pm · sauna + cold plunge</div>
+      <div class="slot-title">Sthlm Sauna Vinterviken</div>
+      <div class="slot-tags"><span class="tag tag-train">25 min metro</span><span class="tag tag-must">Book ahead</span></div>
+      <p class="slot-note">★ 4.9 · "Stockholm's finest sauna." Lakeside, with cold dips in the lake itself. 2hr sessions. Properly Nordic.</p>
+      <p class="slot-note"><strong>Backup if booked out:</strong> ASCARO Sauna in central NK Parkaden (5 min from hotel) — private bookings for groups of 6, sauna + ice bath.</p>
+      <div class="slot-actions">
+        <a class="btn" href="https://maps.google.com/?cid=7237381495787145749" target="_blank" rel="noopener">Vinterviken</a>
+        <a class="btn" href="https://maps.google.com/?cid=12570858418257666490" target="_blank" rel="noopener">ASCARO (backup)</a>
+      </div>
+    </div>
+
+    <div class="slot featured">
+      <div class="slot-tag">The stag dinner</div>
+      <div class="slot-time">8:00pm · phones away</div>
+      <div class="slot-title">Punk Royale</div>
+      <div class="slot-tags"><span class="tag tag-taxi">Södermalm · 15 min</span><span class="tag tag-must">Book NOW</span></div>
+      <p class="slot-note">★ 4.6 · 1,100 reviews. <strong>They take your phone at the door.</strong> No menu — set tasting, vodka shots throughout, caviar, waiters with no filter. The most unhinged Michelin-tier meal in Stockholm. ~€150pp with drinks. "You leave drunk, screaming with laughter, not sure what you ate."</p>
+      <p class="slot-note"><strong>Why this one:</strong> Friday is the party night — Punk Royale fits the energy and rolls straight into Trädgården after. The chaos is the point.</p>
+      <div class="slot-actions">
+        <a class="btn" href="https://maps.google.com/?cid=13895090340820575831" target="_blank" rel="noopener">Map</a>
+      </div>
+    </div>
+
+    <div class="slot">
+      <div class="slot-time">11:00pm · cocktails</div>
+      <div class="slot-title">Othilia</div>
+      <div class="slot-tags"><span class="tag tag-walk">8 min walk</span></div>
+      <p class="slot-note">★ 4.9 · 57 reviews. Hidden cocktail bar behind a Michelin restaurant. "One of the best cocktail bars on the planet."</p>
+      <div class="slot-actions">
+        <a class="btn" href="https://maps.google.com/?cid=13170148823060611521" target="_blank" rel="noopener">Map</a>
+      </div>
+    </div>
+
+    <div class="slot">
+      <div class="slot-time">1:00am · club</div>
+      <div class="slot-title">Trädgården</div>
+      <div class="slot-tags"><span class="tag tag-taxi">15 min taxi</span></div>
+      <p class="slot-note">★ 4.0 · 1,200 reviews. Open-air club under a bridge in Hammarby. Multiple DJ areas, food trucks, basketball court inside, swings between zones. Genuinely unique. Only open Fri/Sat in summer.</p>
+      <div class="slot-actions">
+        <a class="btn" href="https://maps.google.com/?cid=14193275193080037803" target="_blank" rel="noopener">Map</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- SAT -->
+  <section class="day-section" data-day="sat">
+    <div class="day-heading">
+      <div class="day-date">Saturday 13 June</div>
+      <h2 class="day-title">Archipelago + <em>finale</em></h2>
+      <div class="day-meta">
+        <span class="pill">Boat day</span>
+        <span class="pill pill-warn">City rammed</span>
+      </div>
+    </div>
+
+    <div class="slot featured">
+      <div class="slot-tag">⚠️ Heads up</div>
+      <div class="slot-title">Royal Golden Wedding day</div>
+      <p class="slot-note">It's the King & Queen's 50th anniversary. Royal procession through the city, open-air concert in Kungsträdgården (literally 5 min from your hotel), road closures, huge crowds. Plus Foo Fighters at Strawberry Arena = the entire city is partying. Restaurants will be SLAMMED — book everything in advance.</p>
+    </div>
+
+    <div class="slot">
+      <div class="slot-time">10:00am · slow brunch</div>
+      <div class="slot-title">Hotel breakfast or Komet Café</div>
+      <p class="slot-note">Easy start. Komet Café (★ 4.8) for a proper bakery experience nearby if hotel breakfast is mid.</p>
+      <div class="slot-actions">
+        <a class="btn" href="https://maps.google.com/?cid=37822540094317449" target="_blank" rel="noopener">Komet Café</a>
+      </div>
+    </div>
+
+    <div class="slot featured">
+      <div class="slot-tag">The must-have</div>
+      <div class="slot-time">12:00pm · archipelago tour</div>
+      <div class="slot-title">Stockholm Archipelago Summer Ride</div>
+      <div class="slot-tags"><span class="tag tag-boat">2.5hr cruise</span><span class="tag tag-must">Book ahead</span></div>
+      <p class="slot-note">★ 4.9 · 179 reviews. 2.5-hour boat through ~5 islands, commentary in English, Swedish charcuterie on board. Departs Skeppsbrokajen near Old Town. Beautiful, easy, doesn't kill the whole day.</p>
+      <p class="slot-note"><strong>If you want private:</strong> Stockholm Boat Tour (★ 4.7) — Gustav runs private group charters from Strandvägskajen, 2-8 hour options, swim stops, lunch on islands. Can book day-before.</p>
+      <div class="slot-actions">
+        <a class="btn" href="https://maps.google.com/?cid=3453032739144716279" target="_blank" rel="noopener">Summer Ride</a>
+        <a class="btn" href="https://maps.google.com/?cid=3070067614168175220" target="_blank" rel="noopener">Private boat</a>
+      </div>
+    </div>
+
+    <div class="slot">
+      <div class="slot-time">3:30pm · activity</div>
+      <div class="slot-title">Mad Axe Throwing Club</div>
+      <div class="slot-tags"><span class="tag tag-walk">10 min walk</span></div>
+      <p class="slot-note">★ 4.5 · Central, walking distance from hotel. Mike runs the safety briefing, lanes for the group, properly competitive. 90 min session. Book ahead for Saturday.</p>
+      <div class="slot-actions">
+        <a class="btn" href="https://maps.google.com/?cid=12860780055994630621" target="_blank" rel="noopener">Map</a>
+      </div>
+    </div>
+
+    <div class="slot featured">
+      <div class="slot-tag">The big stag dinner</div>
+      <div class="slot-time">8:00pm · the finale</div>
+      <div class="slot-title">Adam/Albin</div>
+      <div class="slot-tags"><span class="tag tag-walk">8 min walk</span><span class="tag tag-must">Book WEEKS ahead</span></div>
+      <p class="slot-note">★ 4.8 · 664 reviews · Michelin-starred. The most consistent rave reviews in Stockholm — "the most worthwhile Michelin-starred tasting menu I have experienced," "if I could, I would award this place two Michelin stars today." ~€180pp. Warm, engaging service. The proper send-off meal.</p>
+      <p class="slot-note"><strong>If Adam/Albin is full:</strong> Ekstedt (★ 4.7 · Michelin) — everything cooked over open fire, refined and beautiful. Or Nour (★ 4.7) — Japanese-Swedish, 9 courses, hidden gem.</p>
+      <div class="slot-actions">
+        <a class="btn" href="https://maps.google.com/?cid=13923077466076905205" target="_blank" rel="noopener">Adam/Albin</a>
+        <a class="btn" href="https://maps.google.com/?cid=7364881960437305947" target="_blank" rel="noopener">Ekstedt (alt)</a>
+        <a class="btn" href="https://maps.google.com/?cid=8504732769540276356" target="_blank" rel="noopener">Nour (alt)</a>
+      </div>
+    </div>
+
+    <div class="slot">
+      <div class="slot-time">11:30pm · final night</div>
+      <div class="slot-title">Bar Lilla Compagniet → Trädgården</div>
+      <div class="slot-tags"><span class="tag tag-taxi">Taxi between</span></div>
+      <p class="slot-note">Lilla Compagniet (★ 4.7) for a proper cocktail in Södermalm, then back to Trädgården if anyone has anything left in the tank.</p>
+      <div class="slot-actions">
+        <a class="btn" href="https://maps.google.com/?cid=2291945023929109314" target="_blank" rel="noopener">Lilla Compagniet</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- SUN -->
+  <section class="day-section" data-day="sun">
+    <div class="day-heading">
+      <div class="day-date">Sunday 14 June</div>
+      <h2 class="day-title">Home <em>bound</em></h2>
+      <div class="day-meta">
+        <span class="pill">Recovery + flight</span>
+      </div>
+    </div>
+
+    <div class="slot">
+      <div class="slot-time">10:00am · slow morning</div>
+      <div class="slot-title">Hotel breakfast + pack</div>
+      <p class="slot-note">Reception can hold bags after checkout if flight isn't till later. What time's the flight back?</p>
+    </div>
+
+    <div class="slot">
+      <div class="slot-time">12:00pm · last hurrah</div>
+      <div class="slot-title">Lunch at Café Pascal or Komet</div>
+      <p class="slot-note">Proper cardamom bun + filter coffee on the way out. The Stockholm send-off.</p>
+    </div>
+
+    <div class="slot">
+      <div class="slot-time">to airport</div>
+      <div class="slot-title">Arlanda Express</div>
+      <p class="slot-note">From Stockholm Central (next to hotel) · 20 min · ~£26 return · runs every 15 min. Way better than the Aerobus or taxi.</p>
+    </div>
+  </section>
+
+  <!-- CHECKLIST + REFERENCE -->
+  <div style="padding: 0 24px; background: var(--bg-card);">
+    <div class="section-divider">
+      <div class="section-eyebrow">Bookings</div>
+      <h3 class="section-title">Lock these in</h3>
+      <div id="checklist"></div>
+    </div>
+
+    <div class="section-divider">
+      <div class="section-eyebrow">Reference</div>
+      <h3 class="section-title">On the day</h3>
+
+      <div class="ref-card alert">
+        <div class="ref-title">⚠️ Saturday is a big day in Stockholm</div>
+        <div class="ref-body">Royal Golden Wedding (50th anniversary) on Sat 13. Procession + concert in Kungsträdgården, plus Foo Fighters at Strawberry Arena, plus Rosendal Garden Party (Djurgården). Book restaurants & taxis early — the city will be heaving.</div>
+      </div>
+      <div class="ref-card">
+        <div class="ref-title">Hotel</div>
+        <div class="ref-body">Scandic, Norrmalm. 2 min walk from Stockholm Central Station.</div>
+      </div>
+      <div class="ref-card">
+        <div class="ref-title">Airport → Hotel</div>
+        <div class="ref-body">Arlanda Express train · 20 min · ~£26 return · much faster than bus or taxi. Or Flygbussarna coach for ~£10 if budget matters.</div>
+      </div>
+      <div class="ref-card">
+        <div class="ref-title">Getting around</div>
+        <div class="ref-body">SL travel card: 24-hour pass ~£11. Covers metro, tram, bus, AND the ferry to Djurgården. Buy in the SL app on arrival.</div>
+      </div>
+      <div class="ref-card">
+        <div class="ref-title">Money</div>
+        <div class="ref-body">Stockholm is basically cashless. <strong>Bring cards only, no cash needed</strong>. Pubs, taxis, museums all card. Watch out — Sweden is expensive: pint ~£8, cocktail ~£14, dinner mains ~£25.</div>
+      </div>
+      <div class="ref-card">
+        <div class="ref-title">Daylight</div>
+        <div class="ref-body">Sunset around 10pm, full daylight till 11pm, never really gets properly dark. Will mess with your sleep — eye masks are gold.</div>
+      </div>
+      <div class="ref-card">
+        <div class="ref-title">Tipping</div>
+        <div class="ref-body">Not expected. Round up at restaurants if service was great. No bar tips.</div>
+      </div>
+    </div>
+  </div>
+
+  <footer class="footer">
+    <span class="footer-mark">Skål</span>
+    Save to home screen<br>for offline access
+  </footer>
+
+</div>
+
+<script>
+  const tabs = document.querySelectorAll('.tab');
+  const days = document.querySelectorAll('.day-section');
+  tabs.forEach(t => t.addEventListener('click', () => {
+    tabs.forEach(x => x.classList.remove('active'));
+    days.forEach(x => x.classList.remove('active'));
+    t.classList.add('active');
+    document.querySelector('.day-section[data-day="' + t.dataset.day + '"]').classList.add('active');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }));
+
+  function updateCountdown() {
+    const trip = new Date('2026-06-11T13:00:00');
+    const now = new Date();
+    const diff = trip - now;
+    const days = Math.ceil(diff / (1000 * 60 * 60 * 24));
+    const el = document.getElementById('countdown-num');
+    const banner = document.getElementById('countdown');
+    if (days > 1) { el.textContent = days; }
+    else if (days === 1) { el.textContent = '1'; banner.innerHTML = '<span class="countdown-num">1</span> day to go'; }
+    else if (days === 0) { banner.innerHTML = '<span class="countdown-num">It\'s today</span>'; }
+    else if (days < 0 && days >= -3) { banner.innerHTML = '<span class="countdown-num">In Stockholm</span>'; }
+    else { banner.style.display = 'none'; }
+  }
+  updateCountdown();
+
+  const checklist = [
+    { id: 'punk', label: 'Punk Royale — Fri 8pm dinner', sub: 'Book ASAP, set tasting menu, phones go away' },
+    { id: 'adamalbin', label: 'Adam/Albin — Sat 8pm dinner', sub: 'Michelin · book weeks ahead' },
+    { id: 'sauna', label: 'Sthlm Sauna Vinterviken booking', sub: 'Group of 4-6, Friday afternoon' },
+    { id: 'archipelago', label: 'Archipelago tour — Sat morning', sub: 'Summer Ride or private with Gustav' },
+    { id: 'axe', label: 'Mad Axe Throwing — Sat afternoon', sub: 'Group lane, 90 min session' },
+    { id: 'club', label: 'Trädgården table or guest list', sub: 'Fri or Sat night' },
+    { id: 'lilla', label: 'Lilla Gästabud — Thu 7:30pm', sub: 'Small spot, book ahead for the group' },
+    { id: 'arlanda', label: 'Arlanda Express tickets', sub: 'Or pay at the machine on arrival' },
+    { id: 'sl', label: 'SL travel card 24/72hr pass', sub: 'Download SL app, buy on arrival' },
+    { id: 'flights', label: 'Flights confirmed for the group', sub: 'LHR ~9-10am out, Sun return' }
+  ];
+
+  let saved = {};
+  try { saved = JSON.parse(localStorage.getItem('sthlm-stag-checks') || '{}'); } catch(e) {}
+
+  const cl = document.getElementById('checklist');
+  checklist.forEach(item => {
+    const done = !!saved[item.id];
+    const el = document.createElement('div');
+    el.className = 'check-item' + (done ? ' done' : '');
+    el.innerHTML = '<div class="check-box"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"></polyline></svg></div><div class="check-content"><div class="check-label">' + item.label + '</div><div class="check-sub">' + item.sub + '</div></div>';
+    el.addEventListener('click', () => {
+      saved[item.id] = !saved[item.id];
+      try { localStorage.setItem('sthlm-stag-checks', JSON.stringify(saved)); } catch(e) {}
+      el.classList.toggle('done');
+    });
+    cl.appendChild(el);
+  });
+</script>
+</body>
+</html>
