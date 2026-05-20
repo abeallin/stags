@@ -25,10 +25,12 @@ export default function Stag({ slug }: { slug: string }) {
   }, []);
 
   useEffect(() => {
-    if (bundle?.stag.accent_color) {
-      document.documentElement.style.setProperty("--accent", bundle.stag.accent_color);
-    }
-  }, [bundle]);
+    if (!bundle) return;
+    document.documentElement.style.setProperty("--accent", bundle.stag.accent_color);
+    const link = document.getElementById("dynamic-manifest") as HTMLLinkElement | null;
+    if (link) link.href = `manifest-${slug}.webmanifest`;
+    document.title = bundle.stag.name;
+  }, [bundle, slug]);
 
   useEffect(() => {
     if (!bundle || userPickedDay) return;

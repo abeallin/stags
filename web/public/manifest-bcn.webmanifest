@@ -1,0 +1,13 @@
+{
+  "name": "BCN Stag · June 2026",
+  "short_name": "BCN Stag",
+  "start_url": "./bcn",
+  "scope": "./",
+  "display": "standalone",
+  "theme_color": "#1a1a1a",
+  "background_color": "#f4ede1",
+  "icons": [
+    { "src": "icon-bcn-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "icon-bcn-512.png", "sizes": "512x512", "type": "image/png" }
+  ]
+}
