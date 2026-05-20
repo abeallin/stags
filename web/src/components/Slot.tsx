@@ -27,6 +27,16 @@ export default function Slot({ slot, state = "future", onSave, onDelete, onMove 
         </div>
       )}
       {slot.note && <p className="slot-note">{slot.note}</p>}
+      {(slot.map_url || slot.website_url) && (
+        <div className="slot-actions">
+          {slot.map_url && (
+            <a className="btn" href={slot.map_url} target="_blank" rel="noopener noreferrer">Map</a>
+          )}
+          {slot.website_url && (
+            <a className="btn" href={slot.website_url} target="_blank" rel="noopener noreferrer">Website</a>
+          )}
+        </div>
+      )}
       {onSave && (
         <div className="slot-edit-icons">
           <button onClick={() => setEditOpen(true)}>Edit</button>

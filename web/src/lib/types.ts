@@ -36,6 +36,8 @@ export interface Slot {
   tags: Tag[];
   is_featured: boolean;
   sort_order: number;
+  map_url?: string;
+  website_url?: string;
 }
 
 export interface Edit {

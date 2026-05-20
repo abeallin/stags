@@ -16,6 +16,8 @@ export default function EditSlotModal({ slot, onSave, onClose }: Props) {
   const [note, setNote]           = useState(slot.note);
   const [isFeatured, setFeatured] = useState(slot.is_featured);
   const [tagsRaw, setTagsRaw]     = useState(JSON.stringify(slot.tags ?? [], null, 2));
+  const [mapUrl, setMapUrl]       = useState(slot.map_url ?? "");
+  const [websiteUrl, setWebsiteUrl] = useState(slot.website_url ?? "");
   const [busy, setBusy]           = useState(false);
   const [error, setError]         = useState<string | null>(null);
 
@@ -44,6 +46,8 @@ export default function EditSlotModal({ slot, onSave, onClose }: Props) {
         note,
         is_featured: isFeatured,
         tags:        parsedTags,
+        map_url:     mapUrl.trim(),
+        website_url: websiteUrl.trim(),
       });
       onClose();
     } catch (e) {
@@ -71,6 +75,12 @@ export default function EditSlotModal({ slot, onSave, onClose }: Props) {
 
           <label>Tags (JSON)</label>
           <textarea value={tagsRaw} onChange={e => setTagsRaw(e.target.value)} style={{ fontFamily: "monospace", fontSize: 12 }} />
+
+          <label>Map URL (optional)</label>
+          <input type="url" value={mapUrl} onChange={e => setMapUrl(e.target.value)} placeholder="https://maps.google.com/..." />
+
+          <label>Website URL (optional)</label>
+          <input type="url" value={websiteUrl} onChange={e => setWebsiteUrl(e.target.value)} placeholder="https://..." />
 
           <label style={{ display: "flex", alignItems: "center", gap: 8 }}>
             <input type="checkbox" checked={isFeatured} onChange={e => setFeatured(e.target.checked)} />

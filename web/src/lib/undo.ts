@@ -19,6 +19,8 @@ export function buildUndoOps(edit: Edit): UndoOp[] {
           note:        before.note,
           tags:        before.tags,
           is_featured: before.is_featured,
+          map_url:     before.map_url ?? "",
+          website_url: before.website_url ?? "",
         },
       }];
     }
@@ -38,6 +40,8 @@ export function buildUndoOps(edit: Edit): UndoOp[] {
           tags:        before.tags,
           is_featured: before.is_featured,
           sort_order:  before.sort_order,
+          map_url:     before.map_url ?? "",
+          website_url: before.website_url ?? "",
         },
       }];
     }

@@ -43,6 +43,8 @@ describe("buildUndoOps", () => {
         note: "Land + check in",
         tags: [{ label: "L4 metro", kind: "train" }],
         is_featured: false,
+        map_url: "",
+        website_url: "",
       },
     });
     expect(ops[0]).not.toHaveProperty("data.id");
