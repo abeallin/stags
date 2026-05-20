@@ -821,10 +821,20 @@ body.editing .slot-edit-icons { display: flex; flex-wrap: wrap; }
 }
 .modal-close:hover { background: var(--accent); color: var(--ink); border-color: var(--accent); }
 
+.modal form {
+  display: flex;
+  flex-direction: column;
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow: hidden;
+}
+
 .modal-body {
   padding: 20px;
   overflow-y: auto;
-  flex: 1;
+  -webkit-overflow-scrolling: touch;
+  flex: 1 1 0;
+  min-height: 0;
 }
 
 .modal label,
