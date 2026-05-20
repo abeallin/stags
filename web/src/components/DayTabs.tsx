@@ -4,11 +4,12 @@ interface Props {
   days: DayType[];
   activeDayId: string;
   onSelect: (dayId: string) => void;
+  onAddDay?: () => Promise<void>;
 }
 
 const DAY_NAMES = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 
-export default function DayTabs({ days, activeDayId, onSelect }: Props) {
+export default function DayTabs({ days, activeDayId, onSelect, onAddDay }: Props) {
   return (
     <nav className="day-tabs">
       {days.map(d => {
@@ -24,6 +25,9 @@ export default function DayTabs({ days, activeDayId, onSelect }: Props) {
           </button>
         );
       })}
+      {onAddDay && (
+        <button className="tab" onClick={onAddDay} title="Add day">+</button>
+      )}
     </nav>
   );
 }

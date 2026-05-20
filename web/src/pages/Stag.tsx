@@ -96,6 +96,71 @@ export default function Stag({ slug }: { slug: string }) {
     });
   }
 
+  async function handleAddSlot(dayId: string) {
+    if (!bundle) return;
+    const daySlots = bundle.slots.filter(s => s.day === dayId);
+    const nextOrder = daySlots.length === 0 ? 0 : Math.max(...daySlots.map(s => s.sort_order)) + 1;
+    const day = bundle.days.find(d => d.id === dayId);
+    if (!day) return;
+    const created = await pb.collection("slots").create({
+      day:         dayId,
+      start_time:  `${day.date}T12:00`,
+      time_label:  "12:00pm · new slot",
+      title:       "New slot",
+      note:        "",
+      tags:        [],
+      is_featured: false,
+      sort_order:  nextOrder,
+    });
+    await pb.collection("edits").create({
+      stag:      bundle.stag.id,
+      kind:      "slot.create",
+      target_id: created.id,
+      before:    null,
+      after:     created,
+      who:       displayName || "anon",
+    });
+  }
+
+  async function handleAddDay() {
+    if (!bundle) return;
+    const nextOrder = bundle.days.length === 0 ? 0 : Math.max(...bundle.days.map(d => d.sort_order)) + 1;
+    const lastDate = bundle.days[bundle.days.length - 1]?.date ?? bundle.stag.end_date;
+    const newDate = new Date(lastDate + "T00:00");
+    newDate.setDate(newDate.getDate() + 1);
+    const dateStr = newDate.toISOString().slice(0, 10);
+    const created = await pb.collection("days").create({
+      stag:       bundle.stag.id,
+      date:       dateStr,
+      title:      "New day",
+      subtitle:   "",
+      sort_order: nextOrder,
+    });
+    await pb.collection("edits").create({
+      stag:      bundle.stag.id,
+      kind:      "day.create",
+      target_id: created.id,
+      before:    null,
+      after:     created,
+      who:       displayName || "anon",
+    });
+  }
+
+  async function handleDeleteDay(dayId: string) {
+    if (!bundle) return;
+    const before = bundle.days.find(d => d.id === dayId);
+    if (!confirm(`Delete day "${before?.title}" and all its slots?`)) return;
+    await pb.collection("days").delete(dayId);
+    await pb.collection("edits").create({
+      stag:      bundle.stag.id,
+      kind:      "day.delete",
+      target_id: dayId,
+      before,
+      after:     null,
+      who:       displayName || "anon",
+    });
+  }
+
   function handleToggleEdit() {
     if (editing) {
       setEditing(false);
@@ -149,6 +214,7 @@ export default function Stag({ slug }: { slug: string }) {
         days={bundle.days}
         activeDayId={activeDayId}
         onSelect={(id) => { setActiveDayId(id); setUserPickedDay(true); }}
+        onAddDay={editing ? handleAddDay : undefined}
       />
       {bundle.days.map(d => (
         <Day
@@ -160,6 +226,8 @@ export default function Stag({ slug }: { slug: string }) {
           onSlotSave={editing ? handleSlotSave : undefined}
           onSlotDelete={editing ? handleSlotDelete : undefined}
           onSlotMove={editing ? handleSlotMove : undefined}
+          onAddSlot={editing ? handleAddSlot : undefined}
+          onDeleteDay={editing ? handleDeleteDay : undefined}
         />
       ))}
       {showGate && (
