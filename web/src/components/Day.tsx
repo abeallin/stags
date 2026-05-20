@@ -24,8 +24,8 @@ export default function Day({ day, slots, active, slotStates, onSlotSave, onSlot
         {day.subtitle && <div className="day-meta">{day.subtitle}</div>}
         {onDeleteDay && (
           <button
+            className="delete-day-btn"
             onClick={() => onDeleteDay(day.id)}
-            style={{ position: "absolute", top: 8, right: 8, fontSize: 11, padding: "4px 8px", border: "1px solid var(--line-strong)", background: "transparent", borderRadius: 4, cursor: "pointer", color: "var(--ink-soft)" }}
           >
             Delete day
           </button>
@@ -42,11 +42,7 @@ export default function Day({ day, slots, active, slotStates, onSlotSave, onSlot
         />
       ))}
       {onAddSlot && (
-        <button
-          className="slot"
-          style={{ width: "100%", border: "1px dashed var(--line-strong)", background: "transparent", cursor: "pointer", padding: 16, color: "var(--ink-faint)" }}
-          onClick={() => onAddSlot(day.id)}
-        >
+        <button className="add-slot" onClick={() => onAddSlot(day.id)}>
           + add slot
         </button>
       )}

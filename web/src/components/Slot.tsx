@@ -1,6 +1,7 @@
 import { useState } from "react";
 import type { Slot as SlotType } from "../lib/types";
 import EditSlotModal from "./EditSlotModal";
+import LinkPreview from "./LinkPreview";
 
 interface Props {
   slot: SlotType;
@@ -28,12 +29,12 @@ export default function Slot({ slot, state = "future", onSave, onDelete, onMove 
       )}
       {slot.note && <p className="slot-note">{slot.note}</p>}
       {(slot.map_url || slot.website_url) && (
-        <div className="slot-actions">
+        <div className="slot-previews">
           {slot.map_url && (
-            <a className="btn" href={slot.map_url} target="_blank" rel="noopener noreferrer">Map</a>
+            <LinkPreview url={slot.map_url} fallbackLabel="Open in Maps" kind="map" />
           )}
           {slot.website_url && (
-            <a className="btn" href={slot.website_url} target="_blank" rel="noopener noreferrer">Website</a>
+            <LinkPreview url={slot.website_url} fallbackLabel="Visit website" kind="site" />
           )}
         </div>
       )}
@@ -42,7 +43,7 @@ export default function Slot({ slot, state = "future", onSave, onDelete, onMove 
           <button onClick={() => setEditOpen(true)}>Edit</button>
           {onMove && <button onClick={() => onMove(slot.id, "up")}>↑</button>}
           {onMove && <button onClick={() => onMove(slot.id, "down")}>↓</button>}
-          {onDelete && <button onClick={() => {
+          {onDelete && <button className="danger" onClick={() => {
             if (confirm(`Delete "${slot.title}"?`)) onDelete(slot.id);
           }}>Delete</button>}
         </div>
