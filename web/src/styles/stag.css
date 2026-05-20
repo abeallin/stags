@@ -436,7 +436,99 @@ body::before {
   box-shadow: none;
 }
 
-/* ─── LINK PREVIEWS ───────────────────────────────────────────────── */
+/* ─── INLINE THUMB ON SLOT CARD ───────────────────────────────────── */
+.slot-thumb {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  width: 72px;
+  height: 72px;
+  background-color: var(--bone);
+  background-size: cover;
+  background-position: center;
+  border: 1.5px solid var(--ink);
+  display: block;
+  z-index: 1;
+  transition: transform 0.08s, box-shadow 0.08s;
+}
+.slot-thumb:hover {
+  transform: translate(-2px, -2px);
+  box-shadow: 4px 4px 0 var(--accent);
+}
+.slot-thumb:active {
+  transform: translate(1px, 1px);
+  box-shadow: none;
+}
+.slot-thumb-loading {
+  cursor: progress;
+  background:
+    repeating-linear-gradient(
+      135deg,
+      var(--bone) 0 8px,
+      var(--bone-dark) 8px 14px
+    );
+  background-size: 20px 20px;
+  animation: skeleton-pan 1.4s linear infinite;
+}
+
+/* When the thumb is present, reserve right-side space so it doesn't overlap
+   the time/title/tags rows. Note + edit-icons fall below the thumb anyway. */
+.slot.has-thumb .slot-time,
+.slot.has-thumb .slot-title,
+.slot.has-thumb .slot-tags {
+  padding-right: 86px;
+}
+
+/* slot title as a link */
+.slot-title-link {
+  text-decoration: none;
+  color: inherit;
+  display: inline;
+  cursor: pointer;
+  transition: color 0.1s;
+}
+.slot-title-link:hover {
+  color: var(--accent);
+}
+.slot-title-arrow {
+  display: inline-block;
+  font-size: 0.55em;
+  margin-left: 0.4em;
+  color: var(--accent);
+  vertical-align: 0.3em;
+  font-family: 'DM Mono', monospace;
+  font-weight: 500;
+}
+
+/* small "↗ hostname" pill for website_url when it's different from the map */
+.slot-website-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-family: 'DM Mono', monospace;
+  font-size: 11px;
+  letter-spacing: 1px;
+  text-transform: lowercase;
+  padding: 5px 10px 4px;
+  background: var(--bone);
+  border: 1.5px solid var(--ink);
+  color: var(--ink);
+  text-decoration: none;
+  margin-top: 6px;
+  transition: background 0.08s, color 0.08s;
+}
+.slot-website-pill::before {
+  content: '↗';
+  color: var(--accent);
+  font-size: 12px;
+}
+.slot-website-pill:hover {
+  background: var(--ink);
+  color: var(--accent-ink);
+}
+.slot-website-pill:hover::before { color: var(--accent); }
+
+/* ─── LINK PREVIEW CARD (component still used standalone) ─────────── */
 .slot-previews {
   display: flex;
   flex-direction: column;
@@ -755,7 +847,7 @@ body.editing .slot-edit-icons { display: flex; flex-wrap: wrap; }
   border: 2.5px solid var(--ink);
   box-shadow: 8px 8px 0 var(--accent);
   padding: 0;
-  max-height: 92vh;
+  max-height: min(95vh, 760px);
   overflow: hidden;
   display: flex;
   flex-direction: column;
@@ -843,7 +935,7 @@ body.editing .slot-edit-icons { display: flex; flex-wrap: wrap; }
   font-family: 'DM Mono', monospace;
   font-size: 10px;
   color: var(--ink);
-  margin: 14px 0 6px;
+  margin: 11px 0 5px;
   text-transform: uppercase;
   letter-spacing: 2px;
   font-weight: 500;
@@ -888,7 +980,7 @@ body.editing .slot-edit-icons { display: flex; flex-wrap: wrap; }
   box-shadow: 3px 3px 0 var(--accent);
 }
 .modal textarea {
-  min-height: 96px;
+  min-height: 72px;
   resize: vertical;
   line-height: 1.5;
 }
