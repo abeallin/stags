@@ -150,6 +150,121 @@ function ogHtml(s) {
 </body></html>`;
 }
 
+function rootHtml() {
+  return `<!doctype html><html><head><meta charset="utf-8">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bowlby+One&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { width: 1200px; height: 630px; }
+  body {
+    background: #f3ecd9;
+    color: #0a0a0a;
+    font-family: 'DM Mono', monospace;
+    overflow: hidden;
+    position: relative;
+  }
+  body::before {
+    content: '';
+    position: absolute; inset: 0;
+    background:
+      radial-gradient(circle at 50% 50%, rgba(10,10,10,0.08) 1.5px, transparent 2px) 0 0 / 22px 22px,
+      radial-gradient(circle at 50% 50%, rgba(10,10,10,0.05) 1px, transparent 1.5px) 11px 11px / 22px 22px;
+    pointer-events: none;
+  }
+  .frame {
+    position: absolute;
+    inset: 30px;
+    background: #f3ecd9;
+    border: 5px solid #0a0a0a;
+    padding: 48px 60px 56px;
+    display: flex;
+    flex-direction: column;
+  }
+  .eyebrow {
+    font-size: 22px;
+    letter-spacing: 5px;
+    text-transform: uppercase;
+    color: #0a0a0a;
+    font-weight: 500;
+  }
+  h1 {
+    font-family: 'Bowlby One', sans-serif;
+    font-weight: 400;
+    font-size: 228px;
+    line-height: 0.84;
+    text-transform: uppercase;
+    letter-spacing: -0.04em;
+    margin-top: 18px;
+  }
+  .cards {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 22px;
+    margin-top: auto;
+  }
+  .card {
+    border: 2.5px solid #0a0a0a;
+    padding: 22px 24px 20px;
+    color: #f3ecd9;
+    position: relative;
+  }
+  .card.bcn   { background: #c84a2c; }
+  .card.sthlm { background: #2c5f7c; }
+  .card-num {
+    position: absolute;
+    top: -12px; left: 14px;
+    background: #0a0a0a;
+    color: #f3ecd9;
+    font-family: 'DM Mono', monospace;
+    font-size: 14px;
+    letter-spacing: 2px;
+    padding: 2px 10px 1px;
+  }
+  .card-where {
+    font-family: 'Bowlby One', sans-serif;
+    font-size: 56px;
+    line-height: 1;
+    text-transform: uppercase;
+    letter-spacing: -0.02em;
+  }
+  .card-when {
+    font-family: 'DM Mono', monospace;
+    font-size: 18px;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    margin-top: 10px;
+    opacity: 0.95;
+  }
+  .card::after {
+    content: '→';
+    position: absolute;
+    bottom: 14px; right: 18px;
+    font-family: 'Bowlby One', sans-serif;
+    font-size: 36px;
+  }
+</style></head>
+<body>
+  <div class="frame">
+    <div class="eyebrow">// PICK A TRIP — JUNE 2026</div>
+    <h1>Stags</h1>
+    <div class="cards">
+      <div class="card bcn">
+        <div class="card-num">01</div>
+        <div class="card-where">Barcelona</div>
+        <div class="card-when">3—7 JUNE</div>
+      </div>
+      <div class="card sthlm">
+        <div class="card-num">02</div>
+        <div class="card-where">Stockholm</div>
+        <div class="card-when">11—14 JUNE</div>
+      </div>
+    </div>
+  </div>
+</body></html>`;
+}
+
 const browser = await chromium.launch();
 try {
   for (const stag of stags) {
@@ -161,6 +276,14 @@ try {
     await page.close();
     console.log(`  ✓ ${out}`);
   }
+  // Landing/root card showing both stags
+  const rootPage = await browser.newPage({ viewport: { width: 1200, height: 630 } });
+  await rootPage.setContent(rootHtml(), { waitUntil: "networkidle" });
+  await rootPage.evaluate(() => document.fonts.ready);
+  const rootOut = join(PUBLIC, "og-root.png");
+  await rootPage.screenshot({ path: rootOut, clip: { x: 0, y: 0, width: 1200, height: 630 } });
+  await rootPage.close();
+  console.log(`  ✓ ${rootOut}`);
 } finally {
   await browser.close();
 }
