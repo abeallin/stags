@@ -12,7 +12,7 @@ const FIXTURES = [
   { name: "Parc del Fòrum Barcelona",     url: "https://www.google.com/maps/search/?api=1&query=Parc+del+F%C3%B2rum+Barcelona" },
 ];
 
-test("Google Maps embed renders inside a slot-card-sized container", async ({ page }) => {
+test("Google Maps embed renders inside a slot-card-sized container", async ({ page }, testInfo) => {
   // Emulate the slot card width on a typical phone (560px container - 40px padding)
   await page.setViewportSize({ width: 520, height: 800 });
 
@@ -49,13 +49,13 @@ test("Google Maps embed renders inside a slot-card-sized container", async ({ pa
     expect(src).toContain("output=embed");
   }
 
-  // Screenshot the whole stack of embeds for visual eyeball
-  await page.screenshot({ path: "e2e-screenshots/map-embed.png", fullPage: true });
-
-  // And individual frames so we can see what they look like at slot-card size
+  // Screenshots land in Playwright's auto-gitignored test-results/<test>/ dir
+  // so we don't litter the working tree. They're useful when inspecting a
+  // failing run, but otherwise nothing depends on them.
+  await page.screenshot({ path: testInfo.outputPath("map-embed.png"), fullPage: true });
   for (let i = 0; i < FIXTURES.length; i++) {
     await page.locator(".card").nth(i).screenshot({
-      path: `e2e-screenshots/map-embed-${i}.png`,
+      path: testInfo.outputPath(`map-embed-${i}.png`),
     });
   }
 });
