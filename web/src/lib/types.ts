@@ -60,3 +60,14 @@ export interface PresenceRow {
 }
 
 export type TripState = "pre" | "in" | "post";
+
+export interface LinkPreviewRow {
+  id: string;
+  url: string;
+  title: string;
+  description: string;
+  image: string;
+  publisher: string;
+  created: string;
+  updated: string;
+}

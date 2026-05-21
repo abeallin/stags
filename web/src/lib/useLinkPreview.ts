@@ -1,4 +1,6 @@
 import { useEffect, useState } from "react";
+import { pb } from "./pb";
+import type { LinkPreviewRow } from "./types";
 
 export interface Preview {
   title?: string;
@@ -11,6 +13,42 @@ export interface Preview {
 
 const TTL_MS = 7 * 24 * 60 * 60 * 1000;
 const CACHE_PREFIX = "stags.linkpreview.";
+
+function rowToPreview(rec: LinkPreviewRow): Preview {
+  return {
+    title:       rec.title || undefined,
+    description: rec.description || undefined,
+    image:       rec.image || undefined,
+    url:         rec.url,
+    publisher:   rec.publisher || undefined,
+    fetched:     +new Date(rec.updated || rec.created),
+  };
+}
+
+async function fetchFromPb(url: string): Promise<Preview | null> {
+  try {
+    const rec = await pb.collection("link_previews").getFirstListItem<LinkPreviewRow>(
+      `url="${url.replace(/"/g, '\\"')}"`,
+    );
+    return rowToPreview(rec);
+  } catch {
+    return null;
+  }
+}
+
+async function writeToPb(p: Preview): Promise<void> {
+  try {
+    await pb.collection("link_previews").create({
+      url:         p.url,
+      title:       p.title       ?? "",
+      description: p.description ?? "",
+      image:       p.image       ?? "",
+      publisher:   p.publisher   ?? "",
+    });
+  } catch {
+    // unique constraint or network error — another tab beat us, that's fine
+  }
+}
 
 // Session-level circuit breaker. microlink.io's free tier rate-limits at ~50
 // requests/day/IP; with ~20 slots per page and ~10 lads sharing the URL we
@@ -90,45 +128,67 @@ export function useLinkPreview(url: string | undefined | null): UseLinkPreviewRe
     setLoading(true);
     setErrored(false);
     let cancelled = false;
-    enqueue(async () => {
-      // Re-check the breaker inside the queue — an earlier task may have tripped it.
-      if (circuitBroken) {
-        if (!cancelled) { setErrored(true); setLoading(false); }
+
+    // Tier 2: PocketBase shared cache. Don't queue — it's cheap and parallel.
+    (async () => {
+      const fromPb = await fetchFromPb(url);
+      if (cancelled) return;
+      if (fromPb) {
+        writeCache(url, fromPb);
+        setPreview(fromPb);
+        setLoading(false);
         return;
       }
-      // Re-check localStorage in case another tab populated it while we were queued.
-      const fresh = readCache(url);
-      if (fresh) {
-        if (!cancelled) { setPreview(fresh); setLoading(false); }
-        return;
-      }
-      try {
-        const res = await fetch(`https://api.microlink.io/?url=${encodeURIComponent(url)}`);
-        if (res.status === 429) {
-          circuitBroken = true;
-          throw new Error("microlink 429");
+      // Tier 3: microlink. Queue + circuit breaker still apply.
+      enqueue(async () => {
+        if (cancelled) return;
+        if (circuitBroken) {
+          if (!cancelled) { setErrored(true); setLoading(false); }
+          return;
         }
-        if (!res.ok) throw new Error(`microlink ${res.status}`);
-        const json = await res.json();
-        if (json.status !== "success" || !json.data) throw new Error("microlink fail");
-        const data = json.data;
-        const p: Preview = {
-          title:       typeof data.title === "string" ? data.title : undefined,
-          description: typeof data.description === "string" ? data.description : undefined,
-          image:       data.image?.url ?? data.logo?.url,
-          url:         typeof data.url === "string" ? data.url : url,
-          publisher:   typeof data.publisher === "string" ? data.publisher : undefined,
-          fetched:     Date.now(),
-        };
-        writeCache(url, p);
-        consecutiveFailures = 0;
-        if (!cancelled) { setPreview(p); setLoading(false); }
-      } catch {
-        consecutiveFailures++;
-        if (consecutiveFailures >= FAILURE_THRESHOLD) circuitBroken = true;
-        if (!cancelled) { setErrored(true); setLoading(false); }
-      }
-    });
+        // Re-check localStorage + PB in case another tab populated them while queued.
+        const ls = readCache(url);
+        if (ls) {
+          if (!cancelled) { setPreview(ls); setLoading(false); }
+          return;
+        }
+        const pb2 = await fetchFromPb(url);
+        if (pb2) {
+          writeCache(url, pb2);
+          if (!cancelled) { setPreview(pb2); setLoading(false); }
+          return;
+        }
+        try {
+          const res = await fetch(`https://api.microlink.io/?url=${encodeURIComponent(url)}`);
+          if (res.status === 429) {
+            circuitBroken = true;
+            throw new Error("microlink 429");
+          }
+          if (!res.ok) throw new Error(`microlink ${res.status}`);
+          const json = await res.json();
+          if (json.status !== "success" || !json.data) throw new Error("microlink fail");
+          const data = json.data;
+          const p: Preview = {
+            title:       typeof data.title === "string" ? data.title : undefined,
+            description: typeof data.description === "string" ? data.description : undefined,
+            image:       data.image?.url ?? data.logo?.url,
+            url:         typeof data.url === "string" ? data.url : url,
+            publisher:   typeof data.publisher === "string" ? data.publisher : undefined,
+            fetched:     Date.now(),
+          };
+          writeCache(url, p);
+          // Best-effort write to PB so the next lad doesn't pay this cost.
+          // Fire-and-forget — don't block UI on it.
+          void writeToPb(p);
+          consecutiveFailures = 0;
+          if (!cancelled) { setPreview(p); setLoading(false); }
+        } catch {
+          consecutiveFailures++;
+          if (consecutiveFailures >= FAILURE_THRESHOLD) circuitBroken = true;
+          if (!cancelled) { setErrored(true); setLoading(false); }
+        }
+      });
+    })();
     return () => { cancelled = true; };
   }, [url]);
 
