@@ -28,11 +28,6 @@ const stags = [
   },
 ];
 
-// Placeholder fb:app_id silences Facebook's Sharing Debugger warning without
-// requiring a real registered app. Swap for a real ID if/when you wire up
-// FB Insights or Login.
-const FB_APP_ID = "0";
-
 function metaBlock(s) {
   return `<meta property="og:type" content="website">
     <meta property="og:title" content="${s.title}">
@@ -42,7 +37,6 @@ function metaBlock(s) {
     <meta property="og:image:height" content="630">
     <meta property="og:url" content="${SITE}/${s.slug}/">
     <meta property="og:site_name" content="Stags">
-    <meta property="fb:app_id" content="${FB_APP_ID}">
     <meta name="twitter:card" content="summary_large_image">
     <meta name="twitter:title" content="${s.title}">
     <meta name="twitter:description" content="${s.desc}">

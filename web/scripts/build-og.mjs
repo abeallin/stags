@@ -102,17 +102,12 @@ function ogHtml(s) {
     letter-spacing: -0.04em;
     margin-top: 56px;
   }
-  h1 em {
-    font-style: normal;
-    color: ${s.accent};
-    margin-left: 8px;
-  }
   .year {
     font-family: 'Bowlby One', sans-serif;
     font-size: 104px;
     line-height: 0.86;
     letter-spacing: -0.04em;
-    color: #0a0a0a;
+    color: ${s.accent};
     margin-top: 14px;
   }
   .chips {
@@ -146,7 +141,7 @@ function ogHtml(s) {
       <div class="eyebrow">// STAG · ${s.year}</div>
       <div class="corner">·</div>
     </div>
-    <h1>${s.name}<em>·</em></h1>
+    <h1>${s.name}</h1>
     <div class="year">${s.year}</div>
     <div class="chips">
       <div class="chip dark">${s.dates}</div>
