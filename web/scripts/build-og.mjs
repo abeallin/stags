@@ -16,11 +16,11 @@ const PUBLIC = join(__dirname, "..", "public");
 const stags = [
   {
     slug:   "bcn",
-    name:   "Barcelona",
+    name:   "Barca",
     year:   "2026",
     dates:  "3—7 JUNE",
     accent: "#c84a2c",
-    sub:    "5 LADS · BUILDING TO 8",
+    sub:    "THE STAG · EL CIERVO",
   },
   {
     slug:   "sthlm",

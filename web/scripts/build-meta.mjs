@@ -19,7 +19,7 @@ const stags = [
   {
     slug:  "bcn",
     title: "Barcelona Stag · 3–7 June 2026",
-    desc:  "Five lads building to eight. Primavera Sound. The plan.",
+    desc:  "The Stag · El Ciervo. Primavera Sound. The plan.",
   },
   {
     slug:  "sthlm",
