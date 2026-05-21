@@ -20,7 +20,7 @@ const stags = [
     year:   "2026",
     dates:  "3—7 JUNE",
     accent: "#c84a2c",
-    sub:    "5 LADS · 4 NIGHTS",
+    sub:    "5 LADS · BUILDING TO 8",
   },
   {
     slug:   "sthlm",
