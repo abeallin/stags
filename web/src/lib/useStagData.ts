@@ -91,6 +91,8 @@ export function useStagData(slug: string) {
             if (e.action === "create") next.slots = [...b.slots, rec];
             if (e.action === "update") next.slots = b.slots.map(s => s.id === rec.id ? rec : s);
             if (e.action === "delete") next.slots = b.slots.filter(s => s.id !== rec.id);
+            // Re-sort so reorder edits actually propagate to the rendered order
+            next.slots = [...next.slots].sort((a, b) => a.sort_order - b.sort_order);
             return next;
           });
         });

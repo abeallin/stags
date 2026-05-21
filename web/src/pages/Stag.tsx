@@ -5,6 +5,7 @@ import { usePresence } from "../lib/usePresence";
 import { determineTripState, findTodayDayId, formatTMinus, slotStateMap } from "../lib/time";
 import { buildUndoOps } from "../lib/undo";
 import { computeSwap } from "../lib/reorder";
+import { withSlotRequired, padSeconds } from "../lib/pbDate";
 import Header from "../components/Header";
 import DayTabs from "../components/DayTabs";
 import Day from "../components/Day";
@@ -62,7 +63,15 @@ export default function Stag({ slug }: { slug: string }) {
     if (ops.length === 0) return;
     try {
       for (const op of ops) {
-        if (op.op === "update") await pb.collection(op.collection).update(op.id, op.data);
+        if (op.op === "update") {
+          // PB revalidates required fields on PATCH; backfill start_time for slot updates
+          let data = op.data;
+          if (op.collection === "slots" && !("start_time" in data)) {
+            const existing = bundle.slots.find(s => s.id === op.id);
+            if (existing) data = { ...data, start_time: padSeconds(existing.start_time) };
+          }
+          await pb.collection(op.collection).update(op.id, data);
+        }
         else if (op.op === "delete") await pb.collection(op.collection).delete(op.id);
         else if (op.op === "create") await pb.collection(op.collection).create(op.data);
       }
@@ -104,8 +113,11 @@ export default function Stag({ slug }: { slug: string }) {
     if (!bundle) return;
     const swap = computeSwap(bundle.slots, slotId, direction);
     if (!swap) return;
-    await pb.collection("slots").update(swap.slotA.id, { sort_order: swap.slotA.sort_order });
-    await pb.collection("slots").update(swap.slotB.id, { sort_order: swap.slotB.sort_order });
+    const slotA = bundle.slots.find(s => s.id === swap.slotA.id);
+    const slotB = bundle.slots.find(s => s.id === swap.slotB.id);
+    if (!slotA || !slotB) return;
+    await pb.collection("slots").update(swap.slotA.id, withSlotRequired({ sort_order: swap.slotA.sort_order }, slotA));
+    await pb.collection("slots").update(swap.slotB.id, withSlotRequired({ sort_order: swap.slotB.sort_order }, slotB));
     await pb.collection("edits").create({
       stag:      bundle.stag.id,
       kind:      "slot.reorder",
@@ -124,7 +136,7 @@ export default function Stag({ slug }: { slug: string }) {
     if (!day) return;
     const created = await pb.collection("slots").create({
       day:         dayId,
-      start_time:  `${day.date}T12:00`,
+      start_time:  `${day.date}T12:00:00`,
       time_label:  "12:00pm · new slot",
       title:       "New slot",
       note:        "",

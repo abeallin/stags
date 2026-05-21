@@ -66,7 +66,8 @@ export default function EditSlotModal({ slot, onSave, onClose }: Props) {
     setBusy(true); setError(null);
     try {
       await onSave({
-        start_time:  `${date}T${time}`,
+        // PocketBase date validator requires seconds — pad HH:mm → HH:mm:00
+        start_time:  `${date}T${time}:00`,
         time_label:  timeLabel,
         title,
         note,

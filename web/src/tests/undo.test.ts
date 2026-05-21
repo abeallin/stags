@@ -37,7 +37,7 @@ describe("buildUndoOps", () => {
     expect(ops[0]).toEqual({
       op: "update", collection: "slots", id: "sl1",
       data: {
-        start_time: "2026-06-03T20:00",
+        start_time: "2026-06-03T20:00:00",
         time_label: "8pm",
         title: "Arrive",
         note: "Land + check in",
@@ -68,7 +68,7 @@ describe("buildUndoOps", () => {
     if (ops[0].op === "create") {
       expect(ops[0].collection).toBe("slots");
       expect(ops[0].data).toMatchObject({
-        day: "d1", start_time: "2026-06-03T20:00", title: "Arrive", sort_order: 2,
+        day: "d1", start_time: "2026-06-03T20:00:00", title: "Arrive", sort_order: 2,
       });
       expect(ops[0].data).not.toHaveProperty("id");
     }

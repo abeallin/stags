@@ -5,6 +5,12 @@ export type UndoOp =
   | { op: "delete"; collection: "slots" | "days"; id: string }
   | { op: "create"; collection: "slots" | "days"; data: Record<string, unknown> };
 
+// PocketBase rejects "YYYY-MM-DDTHH:MM" (no seconds). useStagData normalizes
+// reads to that shorter form for client time-math; pad when writing back.
+function padSeconds(iso: string): string {
+  return /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}$/.test(iso) ? `${iso}:00` : iso;
+}
+
 export function buildUndoOps(edit: Edit): UndoOp[] {
   switch (edit.kind) {
     case "slot.update": {
@@ -13,7 +19,7 @@ export function buildUndoOps(edit: Edit): UndoOp[] {
       return [{
         op: "update", collection: "slots", id: edit.target_id,
         data: {
-          start_time:  before.start_time,
+          start_time:  padSeconds(before.start_time),
           time_label:  before.time_label,
           title:       before.title,
           note:        before.note,
@@ -33,7 +39,7 @@ export function buildUndoOps(edit: Edit): UndoOp[] {
         op: "create", collection: "slots",
         data: {
           day:         before.day,
-          start_time:  before.start_time,
+          start_time:  padSeconds(before.start_time),
           time_label:  before.time_label,
           title:       before.title,
           note:        before.note,
