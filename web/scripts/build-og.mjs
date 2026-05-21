@@ -24,11 +24,11 @@ const stags = [
   },
   {
     slug:   "sthlm",
-    name:   "Stockholm",
+    name:   "Sthlm",
     year:   "2026",
     dates:  "11—14 JUNE",
     accent: "#2c5f7c",
-    sub:    "STAG · MIDSUMMER",
+    sub:    "THE STAG · HJORTEN",
   },
 ];
 
