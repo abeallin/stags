@@ -8,17 +8,17 @@ function Landing() {
   return (
     <div className="landing">
       <div className="landing-eyebrow">// PICK A TRIP</div>
-      <h1 className="landing-title">Stags<em>·</em></h1>
+      <h1 className="landing-title">Stags</h1>
       <div className="landing-grid">
-        <Link to="/bcn" className="landing-card">
+        <Link to="/bcn" className="landing-card landing-card--bcn">
           <div className="landing-card-num">01</div>
           <div className="landing-card-where">Barcelona</div>
-          <div className="landing-card-when">June · 2026</div>
+          <div className="landing-card-when">June 2026</div>
         </Link>
-        <Link to="/sthlm" className="landing-card">
+        <Link to="/sthlm" className="landing-card landing-card--sthlm">
           <div className="landing-card-num">02</div>
           <div className="landing-card-where">Stockholm</div>
-          <div className="landing-card-when">June · 2026</div>
+          <div className="landing-card-when">June 2026</div>
         </Link>
       </div>
     </div>

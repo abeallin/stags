@@ -20,7 +20,7 @@ const stags = [
     year:   "2026",
     dates:  "3—7 JUNE",
     accent: "#c84a2c",
-    sub:    "THE STAG · EL CIERVO",
+    sub:    "THE STAG EL CIERVO",
   },
   {
     slug:   "sthlm",
@@ -28,7 +28,7 @@ const stags = [
     year:   "2026",
     dates:  "11—14 JUNE",
     accent: "#2c5f7c",
-    sub:    "THE STAG · HJORTEN",
+    sub:    "THE STAG HJORTEN",
   },
 ];
 
@@ -138,8 +138,7 @@ function ogHtml(s) {
 <body>
   <div class="card">
     <div class="head">
-      <div class="eyebrow">// STAG · ${s.year}</div>
-      <div class="corner">·</div>
+      <div class="eyebrow">// STAG ${s.year}</div>
     </div>
     <h1>${s.name}</h1>
     <div class="year">${s.year}</div>
