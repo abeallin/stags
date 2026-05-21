@@ -1370,11 +1370,11 @@ body.editing .slot-edit-icons { display: flex; flex-wrap: wrap; }
 }
 .landing-card {
   display: block;
-  background: var(--card-accent, var(--accent));
+  background: var(--paper);
   border: 2px solid var(--ink);
   padding: 22px 20px 20px;
   text-decoration: none;
-  color: var(--paper);
+  color: var(--ink);
   position: relative;
   transition: transform 0.1s, box-shadow 0.1s;
 }
@@ -1383,7 +1383,7 @@ body.editing .slot-edit-icons { display: flex; flex-wrap: wrap; }
 
 .landing-card:hover {
   transform: translate(-3px, -3px);
-  box-shadow: 8px 8px 0 var(--ink);
+  box-shadow: 8px 8px 0 var(--card-accent);
 }
 .landing-card:active {
   transform: translate(2px, 2px);
@@ -1392,12 +1392,12 @@ body.editing .slot-edit-icons { display: flex; flex-wrap: wrap; }
 .landing-card-num {
   position: absolute;
   top: -10px; left: 12px;
-  background: var(--ink);
-  color: var(--paper);
+  background: var(--paper);
+  color: var(--ink);
   font-family: 'DM Mono', monospace;
   font-size: 11px;
   letter-spacing: 1px;
-  padding: 1px 8px 0;
+  padding: 0 6px;
 }
 .landing-card-where {
   font-family: 'Bowlby One', Impact, sans-serif;
@@ -1405,15 +1405,14 @@ body.editing .slot-edit-icons { display: flex; flex-wrap: wrap; }
   line-height: 1;
   text-transform: uppercase;
   letter-spacing: -0.02em;
-  color: var(--paper);
+  color: var(--card-accent);
 }
 .landing-card-when {
   font-family: 'DM Mono', monospace;
   font-size: 12px;
   letter-spacing: 2px;
   text-transform: uppercase;
-  color: var(--paper);
-  opacity: 0.85;
+  color: var(--ash);
   margin-top: 6px;
 }
 .landing-card::after {
@@ -1422,7 +1421,7 @@ body.editing .slot-edit-icons { display: flex; flex-wrap: wrap; }
   bottom: 14px; right: 16px;
   font-family: 'Bowlby One', Impact, sans-serif;
   font-size: 26px;
-  color: var(--paper);
+  color: var(--card-accent);
 }
 
 /* ─── FOOTER ──────────────────────────────────────────────────────── */
