@@ -442,7 +442,9 @@ body::before {
   margin: 12px 0 10px;
   border: 1.5px solid var(--ink);
   background: var(--bone);
-  aspect-ratio: 16 / 9;
+  width: 100%;
+  max-width: 280px;
+  height: 150px;
   overflow: hidden;
   /* hard-shadow lift on hover lets you know it's interactive */
   transition: transform 0.08s, box-shadow 0.08s;
