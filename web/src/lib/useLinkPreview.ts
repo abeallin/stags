@@ -12,6 +12,26 @@ export interface Preview {
 const TTL_MS = 7 * 24 * 60 * 60 * 1000;
 const CACHE_PREFIX = "stags.linkpreview.";
 
+// Session-level circuit breaker. microlink.io's free tier rate-limits at ~50
+// requests/day/IP; with ~20 slots per page and ~10 lads sharing the URL we
+// blow through that easily. Once any request returns 429 (or after a string
+// of failures), suppress further outbound fetches for the rest of this tab —
+// the page still renders the title-link / website-pill / static-map fallbacks
+// just fine without a microlink preview.
+let circuitBroken = false;
+let consecutiveFailures = 0;
+const FAILURE_THRESHOLD = 3;
+
+// Serialize requests so a 429 on the first call trips the breaker BEFORE the
+// other ~19 slot-previews fire. Concurrency 1, FIFO; cheap given we typically
+// fetch once per URL ever (then localStorage cache).
+let queueTail: Promise<void> = Promise.resolve();
+function enqueue<T>(task: () => Promise<T>): Promise<T> {
+  const next = queueTail.then(task, task);
+  queueTail = next.then(() => undefined, () => undefined);
+  return next;
+}
+
 function readCache(url: string): Preview | null {
   try {
     const raw = localStorage.getItem(CACHE_PREFIX + url);
@@ -59,12 +79,35 @@ export function useLinkPreview(url: string | undefined | null): UseLinkPreviewRe
       setErrored(false);
       return;
     }
+    // Circuit broken (we've already hit rate limits or repeated failures) —
+    // bail out without firing another fetch. Title-link + website-pill still
+    // render via the fallback path in Slot.tsx.
+    if (circuitBroken) {
+      setLoading(false);
+      setErrored(true);
+      return;
+    }
     setLoading(true);
     setErrored(false);
     let cancelled = false;
-    (async () => {
+    enqueue(async () => {
+      // Re-check the breaker inside the queue — an earlier task may have tripped it.
+      if (circuitBroken) {
+        if (!cancelled) { setErrored(true); setLoading(false); }
+        return;
+      }
+      // Re-check localStorage in case another tab populated it while we were queued.
+      const fresh = readCache(url);
+      if (fresh) {
+        if (!cancelled) { setPreview(fresh); setLoading(false); }
+        return;
+      }
       try {
         const res = await fetch(`https://api.microlink.io/?url=${encodeURIComponent(url)}`);
+        if (res.status === 429) {
+          circuitBroken = true;
+          throw new Error("microlink 429");
+        }
         if (!res.ok) throw new Error(`microlink ${res.status}`);
         const json = await res.json();
         if (json.status !== "success" || !json.data) throw new Error("microlink fail");
@@ -77,16 +120,15 @@ export function useLinkPreview(url: string | undefined | null): UseLinkPreviewRe
           publisher:   typeof data.publisher === "string" ? data.publisher : undefined,
           fetched:     Date.now(),
         };
-        if (cancelled) return;
         writeCache(url, p);
-        setPreview(p);
-        setLoading(false);
+        consecutiveFailures = 0;
+        if (!cancelled) { setPreview(p); setLoading(false); }
       } catch {
-        if (cancelled) return;
-        setErrored(true);
-        setLoading(false);
+        consecutiveFailures++;
+        if (consecutiveFailures >= FAILURE_THRESHOLD) circuitBroken = true;
+        if (!cancelled) { setErrored(true); setLoading(false); }
       }
-    })();
+    });
     return () => { cancelled = true; };
   }, [url]);
 
