@@ -914,7 +914,7 @@ body.editing .slot-edit-icons { display: flex; flex-wrap: wrap; }
   padding: 20px;
   overflow-y: auto;
   -webkit-overflow-scrolling: touch;
-  flex: 1 1 0;
+  flex: 1 1 auto;
   min-height: 0;
 }
 
