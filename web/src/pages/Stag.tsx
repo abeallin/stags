@@ -10,6 +10,7 @@ import Header from "../components/Header";
 import DayTabs from "../components/DayTabs";
 import Day from "../components/Day";
 import { pb } from "../lib/pb";
+import { confirm as confirmDialog, toast } from "../lib/dialogs";
 import type { Slot as SlotType } from "../lib/types";
 
 const DISPLAY_NAME_KEY = "stags.displayName";
@@ -77,7 +78,7 @@ export default function Stag({ slug }: { slug: string }) {
       }
       await pb.collection("edits").delete(lastEdit.id);
     } catch (err) {
-      alert(`Couldn't undo: ${String(err)}`);
+      toast(`Couldn't undo: ${String(err)}`, "error");
     }
   }
 
@@ -181,7 +182,14 @@ export default function Stag({ slug }: { slug: string }) {
   async function handleDeleteDay(dayId: string) {
     if (!bundle) return;
     const before = bundle.days.find(d => d.id === dayId);
-    if (!confirm(`Delete day "${before?.title}" and all its slots?`)) return;
+    const slotCount = bundle.slots.filter(s => s.day === dayId).length;
+    const ok = await confirmDialog({
+      title: "Delete day?",
+      body: `"${before?.title}" and ${slotCount === 1 ? "1 slot" : `all ${slotCount} slots`} will be removed. Undoable from the header bar.`,
+      confirmLabel: "Delete day",
+      destructive: true,
+    });
+    if (!ok) return;
     await pb.collection("days").delete(dayId);
     await pb.collection("edits").create({
       stag:      bundle.stag.id,

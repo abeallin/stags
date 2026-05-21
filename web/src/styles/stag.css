@@ -797,15 +797,16 @@ body.editing .slot-edit-icons { display: flex; flex-wrap: wrap; }
 }
 
 .delete-day-btn {
-  position: absolute;
-  top: 0; right: 0;
+  display: block;
+  width: 100%;
+  margin-top: 12px;
   font-family: 'DM Mono', monospace;
-  font-size: 10px;
+  font-size: 11px;
   letter-spacing: 1.5px;
   text-transform: uppercase;
-  padding: 6px 10px 5px;
+  padding: 14px 16px;
   background: var(--paper);
-  border: 1.5px solid var(--danger);
+  border: 1.5px dashed var(--danger);
   color: var(--danger);
   cursor: pointer;
   font-weight: 500;
@@ -813,6 +814,7 @@ body.editing .slot-edit-icons { display: flex; flex-wrap: wrap; }
 .delete-day-btn:hover {
   background: var(--danger);
   color: var(--paper);
+  border-style: solid;
 }
 
 /* ─── DIALOGUES (modal / bottom-sheet) ────────────────────────────── */
@@ -1243,7 +1245,41 @@ body.editing .slot-edit-icons { display: flex; flex-wrap: wrap; }
 }
 .presence-avatar:first-of-type { margin-left: 0; }
 
+/* ─── CONFIRM DIALOG ──────────────────────────────────────────────── */
+.confirm-dialog .modal-body { padding: 22px 24px 4px; }
+.confirm-body {
+  font-family: 'DM Mono', monospace;
+  font-size: 14px;
+  line-height: 1.55;
+  color: var(--ink);
+  margin: 0;
+}
+.modal-foot .primary.danger {
+  background: var(--danger);
+  color: var(--paper);
+}
+.modal-foot .primary.danger:hover {
+  background: var(--ink);
+  color: var(--paper);
+}
+
 /* ─── TOAST ───────────────────────────────────────────────────────── */
+.toast-stack {
+  position: fixed;
+  bottom: 24px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  z-index: 200;
+  pointer-events: none;
+}
+.toast-stack .toast {
+  position: static;
+  transform: none;
+  pointer-events: auto;
+}
 .toast {
   position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%);
   background: var(--ink);

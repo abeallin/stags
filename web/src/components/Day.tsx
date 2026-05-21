@@ -22,14 +22,6 @@ export default function Day({ day, slots, active, slotStates, onSlotSave, onSlot
         </div>
         <h2 className="day-title">{day.title}</h2>
         {day.subtitle && <div className="day-meta">{day.subtitle}</div>}
-        {onDeleteDay && (
-          <button
-            className="delete-day-btn"
-            onClick={() => onDeleteDay(day.id)}
-          >
-            Delete day
-          </button>
-        )}
       </div>
       {slots.map(s => (
         <Slot
@@ -44,6 +36,11 @@ export default function Day({ day, slots, active, slotStates, onSlotSave, onSlot
       {onAddSlot && (
         <button className="add-slot" onClick={() => onAddSlot(day.id)}>
           + add slot
+        </button>
+      )}
+      {onDeleteDay && (
+        <button className="delete-day-btn" onClick={() => onDeleteDay(day.id)}>
+          Delete this day
         </button>
       )}
     </section>

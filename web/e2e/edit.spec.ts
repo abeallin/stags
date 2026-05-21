@@ -88,10 +88,11 @@ test.describe("Slot CRUD", () => {
     await page.locator(".modal-foot button.primary").click();
     await expect(slotCardByTitle(page, editedTitle)).toBeVisible({ timeout: 8_000 });
 
-    // DELETE
-    page.once("dialog", (d) => d.accept());
+    // DELETE — custom confirm dialog
     await slotCardByTitle(page, editedTitle)
       .locator(".slot-edit-icons button").filter({ hasText: /^Delete$/ }).click();
+    await expect(page.locator(".confirm-dialog")).toBeVisible();
+    await page.locator(".confirm-dialog .modal-foot button.primary").click();
     await expect(slotCardByTitle(page, editedTitle)).toHaveCount(0, { timeout: 8_000 });
   });
 
@@ -137,9 +138,10 @@ test.describe("Day CRUD", () => {
     await lastDateTab.click();
     await expect(newDaySection).toHaveClass(/active/);
 
-    // Now Delete day is visible — confirm dialog will pop
-    page.once("dialog", (d) => d.accept());
+    // Now Delete day is visible — click it, confirm via the custom dialog
     await newDaySection.locator(".delete-day-btn").click();
+    await expect(page.locator(".confirm-dialog")).toBeVisible();
+    await page.locator(".confirm-dialog .modal-foot button.primary").click();
     await expect(page.locator(".day-section").filter({ has: page.locator(".day-title", { hasText: "New day" }) })).toHaveCount(0, { timeout: 8_000 });
     await expect(page.locator(".day-tabs .tab")).toHaveCount(tabsBefore);
   });

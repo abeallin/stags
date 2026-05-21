@@ -46,7 +46,7 @@ test.describe("BCN stag page", () => {
     const vivo = page.locator(".slot", { hasText: "Vivo Tapas" });
 
     const titleLink = vivo.locator("a.slot-title-link");
-    await expect(titleLink).toHaveAttribute("href", /maps\.google\.com/);
+    await expect(titleLink).toHaveAttribute("href", /google\.com\/maps|maps\.google\.com/);
     await expect(titleLink).toHaveAttribute("target", "_blank");
     await expect(titleLink).toHaveAttribute("rel", /noopener/);
 

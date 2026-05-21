@@ -1,5 +1,6 @@
 import { BrowserRouter, Route, Routes, Link, Navigate } from "react-router-dom";
 import Stag from "./pages/Stag";
+import { DialogHost } from "./lib/dialogs";
 
 const basename = import.meta.env.BASE_URL.replace(/\/$/, "");
 
@@ -33,6 +34,7 @@ export default function App() {
         <Route path="/sthlm" element={<Stag slug="sthlm" />} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
+      <DialogHost />
     </BrowserRouter>
   );
 }

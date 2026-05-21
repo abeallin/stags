@@ -3,6 +3,7 @@ import type { Slot as SlotType } from "../lib/types";
 import EditSlotModal from "./EditSlotModal";
 import { hostname } from "../lib/useLinkPreview";
 import { toEmbedUrl } from "../lib/mapEmbed";
+import { confirm as confirmDialog } from "../lib/dialogs";
 
 interface Props {
   slot: SlotType;
@@ -79,8 +80,14 @@ export default function Slot({ slot, state = "future", onSave, onDelete, onMove 
           <button onClick={() => setEditOpen(true)}>Edit</button>
           {onMove && <button onClick={() => onMove(slot.id, "up")}>↑</button>}
           {onMove && <button onClick={() => onMove(slot.id, "down")}>↓</button>}
-          {onDelete && <button className="danger" onClick={() => {
-            if (confirm(`Delete "${slot.title}"?`)) onDelete(slot.id);
+          {onDelete && <button className="danger" onClick={async () => {
+            const ok = await confirmDialog({
+              title: "Delete slot?",
+              body: `"${slot.title}" will be removed. You can still undo this from the header bar.`,
+              confirmLabel: "Delete",
+              destructive: true,
+            });
+            if (ok) onDelete(slot.id);
           }}>Delete</button>}
         </div>
       )}
