@@ -436,47 +436,36 @@ body::before {
   box-shadow: none;
 }
 
-/* ─── INLINE THUMB ON SLOT CARD ───────────────────────────────────── */
-.slot-thumb {
-  position: absolute;
-  top: 14px;
-  right: 14px;
-  width: 72px;
-  height: 72px;
-  background-color: var(--bone);
-  background-size: cover;
-  background-position: center;
+/* ─── INLINE GOOGLE MAPS EMBED ────────────────────────────────────── */
+.slot-map {
+  position: relative;
+  margin: 12px 0 10px;
   border: 1.5px solid var(--ink);
-  display: block;
-  z-index: 1;
+  background: var(--bone);
+  aspect-ratio: 16 / 9;
+  overflow: hidden;
+  /* hard-shadow lift on hover lets you know it's interactive */
   transition: transform 0.08s, box-shadow 0.08s;
 }
-.slot-thumb:hover {
-  transform: translate(-2px, -2px);
-  box-shadow: 4px 4px 0 var(--accent);
+.slot-map:hover {
+  transform: translate(-1px, -1px);
+  box-shadow: 3px 3px 0 var(--accent);
 }
-.slot-thumb:active {
-  transform: translate(1px, 1px);
-  box-shadow: none;
-}
-.slot-thumb-loading {
-  cursor: progress;
-  background:
-    repeating-linear-gradient(
-      135deg,
-      var(--bone) 0 8px,
-      var(--bone-dark) 8px 14px
-    );
-  background-size: 20px 20px;
-  animation: skeleton-pan 1.4s linear infinite;
+.slot-map-iframe {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  border: 0;
+  display: block;
+  /* the iframe loads slowly; bone background prevents a white flash */
+  background: var(--bone);
 }
 
-/* When the thumb is present, reserve right-side space so it doesn't overlap
-   the time/title/tags rows. Note + edit-icons fall below the thumb anyway. */
-.slot.has-thumb .slot-time,
-.slot.has-thumb .slot-title,
-.slot.has-thumb .slot-tags {
-  padding-right: 86px;
+/* Past slots dim their map too */
+.slot.is-past .slot-map {
+  opacity: 0.6;
+  filter: grayscale(0.4);
 }
 
 /* slot title as a link */

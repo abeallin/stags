@@ -1,7 +1,8 @@
 import { useState } from "react";
 import type { Slot as SlotType } from "../lib/types";
 import EditSlotModal from "./EditSlotModal";
-import { useLinkPreview, hostname } from "../lib/useLinkPreview";
+import { hostname } from "../lib/useLinkPreview";
+import { toEmbedUrl } from "../lib/mapEmbed";
 
 interface Props {
   slot: SlotType;
@@ -15,7 +16,6 @@ export default function Slot({ slot, state = "future", onSave, onDelete, onMove 
   const [editOpen, setEditOpen] = useState(false);
 
   const primaryUrl = slot.map_url || slot.website_url;
-  const { preview, loading } = useLinkPreview(primaryUrl);
   const showWebsitePill =
     !!slot.website_url && slot.website_url !== slot.map_url && slot.website_url !== primaryUrl;
 
@@ -24,24 +24,9 @@ export default function Slot({ slot, state = "future", onSave, onDelete, onMove 
   if (state === "now")  classes.push("is-now");
   if (state === "past") classes.push("is-past");
   if (primaryUrl)       classes.push("has-link");
-  if (preview?.image)   classes.push("has-thumb");
 
   return (
     <div className={classes.join(" ")}>
-      {primaryUrl && preview?.image && (
-        <a
-          className="slot-thumb"
-          href={primaryUrl}
-          target="_blank"
-          rel="noopener noreferrer"
-          aria-label={`Open ${slot.title}`}
-          style={{ backgroundImage: `url(${preview.image})` }}
-        />
-      )}
-      {primaryUrl && !preview?.image && loading && (
-        <div className="slot-thumb slot-thumb-loading" aria-hidden="true" />
-      )}
-
       <div className="slot-time">{slot.time_label}</div>
 
       {primaryUrl ? (
@@ -65,6 +50,18 @@ export default function Slot({ slot, state = "future", onSave, onDelete, onMove 
       )}
 
       {slot.note && <p className="slot-note">{slot.note}</p>}
+
+      {slot.map_url && (
+        <div className="slot-map">
+          <iframe
+            src={toEmbedUrl(slot.map_url)}
+            className="slot-map-iframe"
+            loading="lazy"
+            title={`Map of ${slot.title}`}
+            referrerPolicy="no-referrer-when-downgrade"
+          />
+        </div>
+      )}
 
       {showWebsitePill && (
         <a
