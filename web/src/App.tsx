@@ -12,7 +12,7 @@ function Landing() {
         <Link to="/bcn" className="landing-card">
           <div className="landing-card-num">01</div>
           <div className="landing-card-where">Barcelona</div>
-          <div className="landing-card-when">May · 2026</div>
+          <div className="landing-card-when">June · 2026</div>
         </Link>
         <Link to="/sthlm" className="landing-card">
           <div className="landing-card-num">02</div>
