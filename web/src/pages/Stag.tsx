@@ -1,4 +1,4 @@
-import { useEffect, useState, useMemo } from "react";
+import { useEffect, useState, useMemo, useRef } from "react";
 import { useStagData } from "../lib/useStagData";
 import { useEditHistory } from "../lib/useEditHistory";
 import { usePresence } from "../lib/usePresence";
@@ -14,6 +14,7 @@ import { confirm as confirmDialog, toast } from "../lib/dialogs";
 import type { Slot as SlotType } from "../lib/types";
 
 const DISPLAY_NAME_KEY = "stags.displayName";
+const activeDayKey = (slug: string) => `stags.activeDay.${slug}`;
 
 export default function Stag({ slug }: { slug: string }) {
   const { bundle, error } = useStagData(slug);
@@ -38,6 +39,12 @@ export default function Stag({ slug }: { slug: string }) {
 
   useEffect(() => {
     if (!bundle || userPickedDay) return;
+    const saved = localStorage.getItem(activeDayKey(slug));
+    if (saved && bundle.days.some(d => d.id === saved)) {
+      setActiveDayId(saved);
+      setUserPickedDay(true);
+      return;
+    }
     const state = determineTripState(bundle.stag, now);
     if (state === "in") {
       const todayId = findTodayDayId(bundle.days, now);
@@ -47,12 +54,26 @@ export default function Stag({ slug }: { slug: string }) {
     } else {
       setActiveDayId(bundle.days[0]?.id ?? "");
     }
-  }, [bundle, userPickedDay, now]);
+  }, [bundle, userPickedDay, now, slug]);
 
   useEffect(() => {
     document.body.classList.toggle("editing", editing);
     return () => document.body.classList.remove("editing");
   }, [editing]);
+
+  // One-shot: when the trip is live, scroll the NOW slot into view on open.
+  const didAutoScrollRef = useRef(false);
+  useEffect(() => {
+    if (didAutoScrollRef.current || !bundle || !activeDayId) return;
+    if (determineTripState(bundle.stag, now) !== "in") return;
+    const el = document.querySelector(".day-section.active .slot.is-now");
+    if (!el) return;
+    didAutoScrollRef.current = true;
+    const reduce = window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
+    requestAnimationFrame(() =>
+      el.scrollIntoView({ behavior: reduce ? "auto" : "smooth", block: "center" }),
+    );
+  }, [bundle, activeDayId, now]);
 
   const edits = useEditHistory(bundle?.stag.id);
   const lastEdit = edits[0];
@@ -246,11 +267,22 @@ export default function Stag({ slug }: { slug: string }) {
     state === "pre"  ? formatTMinus(bundle.stag.start_date, now) :
     state === "post" ? "Trip complete" : undefined;
 
+  const todayId = findTodayDayId(bundle.days, now);
+  let progress: { frac: number; label: string } | undefined;
+  if (state === "in") {
+    const tripStart = +new Date(bundle.stag.start_date + "T00:00");
+    const tripEnd   = +new Date(bundle.stag.end_date   + "T23:59:59");
+    const frac = Math.min(1, Math.max(0, (+now - tripStart) / (tripEnd - tripStart)));
+    const dayIdx = bundle.days.findIndex(d => d.id === todayId);
+    progress = { frac, label: dayIdx >= 0 ? `Day ${dayIdx + 1} / ${bundle.days.length}` : "In progress" };
+  }
+
   return (
     <div className="container">
       <Header
         stag={bundle.stag}
         tripBadge={badge}
+        progress={progress}
         editing={editing}
         onToggleEdit={handleToggleEdit}
         lastEdit={lastEdit}
@@ -260,7 +292,12 @@ export default function Stag({ slug }: { slug: string }) {
       <DayTabs
         days={bundle.days}
         activeDayId={activeDayId}
-        onSelect={(id) => { setActiveDayId(id); setUserPickedDay(true); }}
+        todayDayId={todayId}
+        onSelect={(id) => {
+          setActiveDayId(id);
+          setUserPickedDay(true);
+          localStorage.setItem(activeDayKey(slug), id);
+        }}
         onAddDay={editing ? handleAddDay : undefined}
       />
       {bundle.days.map(d => (
