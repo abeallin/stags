@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, type CSSProperties } from "react";
 import type { Slot as SlotType } from "../lib/types";
 import EditSlotModal from "./EditSlotModal";
 import { hostname } from "../lib/useLinkPreview";
@@ -8,12 +8,13 @@ import { confirm as confirmDialog } from "../lib/dialogs";
 interface Props {
   slot: SlotType;
   state?: "past" | "now" | "future";
+  index?: number;
   onSave?: (slotId: string, patch: Partial<SlotType>) => Promise<void>;
   onDelete?: (slotId: string) => Promise<void>;
   onMove?: (slotId: string, direction: "up" | "down") => Promise<void>;
 }
 
-export default function Slot({ slot, state = "future", onSave, onDelete, onMove }: Props) {
+export default function Slot({ slot, state = "future", index = 0, onSave, onDelete, onMove }: Props) {
   const [editOpen, setEditOpen] = useState(false);
 
   const primaryUrl = slot.map_url || slot.website_url;
@@ -27,7 +28,7 @@ export default function Slot({ slot, state = "future", onSave, onDelete, onMove 
   if (primaryUrl)       classes.push("has-link");
 
   return (
-    <div className={classes.join(" ")}>
+    <div className={classes.join(" ")} style={{ "--deal-i": index } as CSSProperties}>
       <div className="slot-time">{slot.time_label}</div>
 
       {primaryUrl ? (

@@ -4,6 +4,7 @@ import Presence from "./Presence";
 interface Props {
   stag: Stag;
   tripBadge?: string;
+  progress?: { frac: number; label: string };
   editing: boolean;
   onToggleEdit: () => void;
   lastEdit?: Edit;
@@ -28,7 +29,7 @@ function ago(iso: string): string {
   return `${Math.round(h / 24)}d ago`;
 }
 
-export default function Header({ stag, tripBadge, editing, onToggleEdit, lastEdit, onUndo, viewers }: Props) {
+export default function Header({ stag, tripBadge, progress, editing, onToggleEdit, lastEdit, onUndo, viewers }: Props) {
   return (
     <header className="header">
       <button className={`edit-toggle${editing ? " active" : ""}`} onClick={onToggleEdit}>
@@ -38,6 +39,24 @@ export default function Header({ stag, tripBadge, editing, onToggleEdit, lastEdi
       <h1>{stag.name}</h1>
       {tripBadge && <div className="trip-badge">{tripBadge}</div>}
       <div className="header-meta" dangerouslySetInnerHTML={{ __html: stag.header_meta_html }} />
+      {progress && (
+        <div
+          className="trip-progress"
+          role="progressbar"
+          aria-valuemin={0}
+          aria-valuemax={100}
+          aria-valuenow={Math.round(progress.frac * 100)}
+          aria-label="Trip progress"
+        >
+          <div className="trip-progress-label">
+            <span>{progress.label}</span>
+            <span className="pct">{Math.round(progress.frac * 100)}%</span>
+          </div>
+          <div className="trip-progress-track">
+            <div className="trip-progress-fill" style={{ width: `${progress.frac * 100}%` }} />
+          </div>
+        </div>
+      )}
       {viewers && <Presence viewers={viewers} />}
       {lastEdit && (
         <div className="undo-bar">

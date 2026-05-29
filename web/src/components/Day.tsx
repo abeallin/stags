@@ -23,10 +23,11 @@ export default function Day({ day, slots, active, slotStates, onSlotSave, onSlot
         <h2 className="day-title">{day.title}</h2>
         {day.subtitle && <div className="day-meta">{day.subtitle}</div>}
       </div>
-      {slots.map(s => (
+      {slots.map((s, i) => (
         <Slot
           key={s.id}
           slot={s}
+          index={i}
           state={slotStates?.get(s.id) ?? "future"}
           onSave={onSlotSave}
           onDelete={onSlotDelete}

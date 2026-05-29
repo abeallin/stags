@@ -441,11 +441,13 @@ body::before {
   position: relative;
   margin: 12px 0 10px;
   border: 1.5px solid var(--ink);
-  background: var(--bone);
+  background: var(--paper);
   width: 100%;
   max-width: 280px;
   height: 150px;
   overflow: hidden;
+  /* contain the blend modes below so the duotone treatment doesn't leak */
+  isolation: isolate;
   /* hard-shadow lift on hover lets you know it's interactive */
   transition: transform 0.08s, box-shadow 0.08s;
 }
@@ -460,9 +462,44 @@ body::before {
   height: 100%;
   border: 0;
   display: block;
-  /* the iframe loads slowly; bone background prevents a white flash */
-  background: var(--bone);
+  /* the iframe loads slowly; paper background prevents a white flash */
+  background: var(--paper);
+  /* knock Google's full-colour chrome into a warm print that sits on paper */
+  filter: grayscale(1) sepia(0.42) contrast(1.08) brightness(1.06);
+  mix-blend-mode: multiply;
+  transition: filter 0.18s ease, opacity 0.18s ease;
 }
+/* accent wash — recolours the greyscale map toward the per-stag accent (duotone) */
+.slot-map::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: var(--accent);
+  mix-blend-mode: color;
+  opacity: 0.62;
+  pointer-events: none;
+  transition: opacity 0.18s ease;
+}
+/* corner registration tick, flyer-style */
+.slot-map::before {
+  content: '+';
+  position: absolute;
+  bottom: 4px; right: 6px;
+  z-index: 2;
+  color: var(--ink);
+  font-family: 'DM Mono', monospace;
+  font-size: 13px;
+  opacity: 0.5;
+  pointer-events: none;
+}
+/* reveal the true-colour map on hover/focus-within — tap to read it properly */
+.slot-map:hover .slot-map-iframe,
+.slot-map:focus-within .slot-map-iframe {
+  filter: none;
+  mix-blend-mode: normal;
+}
+.slot-map:hover::after,
+.slot-map:focus-within::after { opacity: 0; }
 
 /* Past slots dim their map too */
 .slot.is-past .slot-map {
@@ -1560,4 +1597,104 @@ body.editing .slot-edit-icons { display: flex; flex-wrap: wrap; }
   .slot { max-width: 720px; }
   .slot-title { font-size: 26px; }
   .add-slot { max-width: 720px; }
+}
+
+/* ─── PAGE-LOAD STAMP CASCADE ─────────────────────────────────────── */
+/* slots deal in one-by-one (delay driven by --deal-i, set per slot in JS),
+   the [01] index stamp pops, and the ★ HEADLINE stamp lands last. */
+.day-section.active .slot {
+  animation: slot-deal 0.34s cubic-bezier(0.2, 0.8, 0.3, 1) both;
+  animation-delay: calc(var(--deal-i, 0) * 0.05s);
+}
+@keyframes slot-deal {
+  from { opacity: 0; transform: translateY(10px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.day-section.active .slot::before {
+  animation: stamp-pop 0.26s cubic-bezier(0.2, 0.8, 0.3, 1) both;
+  animation-delay: calc(var(--deal-i, 0) * 0.05s + 0.1s);
+}
+@keyframes stamp-pop {
+  from { opacity: 0; transform: scale(1.7) rotate(-6deg); }
+  to   { opacity: 1; transform: scale(1) rotate(0); }
+}
+/* the HEADLINE stamp slams down with a tiny overshoot — but only when it's
+   actually showing (a now+featured slot shows the NOW stamp instead). */
+.day-section.active .slot.featured:not(.is-now)::after {
+  animation: headline-land 0.3s cubic-bezier(0.2, 0.8, 0.3, 1) both;
+  animation-delay: calc(var(--deal-i, 0) * 0.05s + 0.16s);
+}
+@keyframes headline-land {
+  0%   { opacity: 0; transform: rotate(-7deg) scale(1.3); }
+  60%  { transform: rotate(2deg) scale(0.97); }
+  100% { opacity: 1; transform: rotate(0) scale(1); }
+}
+
+/* ─── BOARDING-PASS TRIP PROGRESS (header) ────────────────────────── */
+.trip-progress {
+  margin-top: 14px;
+  padding-top: 12px;
+  border-top: 1px dashed rgba(243, 236, 217, 0.25);
+}
+.trip-progress-label {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  font-family: 'DM Mono', monospace;
+  font-size: 9px;
+  letter-spacing: 2.5px;
+  text-transform: uppercase;
+  color: var(--accent);
+  margin-bottom: 7px;
+}
+.trip-progress-label .pct { color: rgba(243, 236, 217, 0.5); }
+.trip-progress-track {
+  position: relative;
+  height: 8px;
+  border: 1px solid rgba(243, 236, 217, 0.3);
+  /* perforated ticket rail */
+  background: repeating-linear-gradient(
+    90deg,
+    rgba(243, 236, 217, 0.16) 0 5px,
+    transparent 5px 8px
+  );
+}
+.trip-progress-fill {
+  position: absolute;
+  top: 0; bottom: 0; left: 0;
+  background: var(--accent);
+  transition: width 0.6s cubic-bezier(0.2, 0.8, 0.3, 1);
+}
+/* the stub knob riding the leading edge */
+.trip-progress-fill::after {
+  content: '';
+  position: absolute;
+  top: 50%; right: -1px;
+  width: 2px; height: 14px;
+  background: var(--paper);
+  transform: translateY(-50%);
+}
+
+/* ─── TODAY MARKER ON DAY TABS ────────────────────────────────────── */
+.tab { position: relative; }
+.tab.is-today:not(.active) { color: var(--accent); }
+.tab.is-today:not(.active)::after {
+  content: '';
+  position: absolute;
+  top: 6px; right: 6px;
+  width: 5px; height: 5px;
+  border-radius: 50%;
+  background: var(--accent);
+}
+
+/* ─── REDUCED MOTION ──────────────────────────────────────────────── */
+/* Honour the OS setting: kill the pulse, deal cascade, sheet/modal slides,
+   and smooth-scroll while keeping every final resting state intact. */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
 }
