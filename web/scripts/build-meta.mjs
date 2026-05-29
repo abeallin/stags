@@ -33,7 +33,7 @@ const stags = [
     slug:  "sthlm",
     image: "og-sthlm.png",
     title: "Stockholm Stag · 11–14 June 2026",
-    desc:  "Sauna, archipelago, Punk Royale. The plan.",
+    desc:  "Jetski wave, shukut (gun), Zora, Rosendal. The plan.",
   },
 ];
 
