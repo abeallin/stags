@@ -35,7 +35,7 @@ migrate((db) => {
   let stag;
   try { stag = dao.findFirstRecordByData("stags", "slug", "bcn"); }
   catch (_) {
-    console.log("[1748000024_bcn_sitges_jetskis] bcn stag not found, skipping");
+    console.log("[1748000027_bcn_sitges_jetskis] bcn stag not found, skipping");
     return;
   }
 
@@ -58,7 +58,7 @@ migrate((db) => {
     website_url: "https://www.aguadoo.com/watersports-sitges/",
   });
 
-  console.log("[1748000024_bcn_sitges_jetskis] Sitges sail with cava → Jet skis along the coast");
+  console.log("[1748000027_bcn_sitges_jetskis] Sitges sail with cava → Jet skis along the coast");
 }, (db) => {
   const dao = new Dao(db);
   let stag;

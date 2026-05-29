@@ -34,7 +34,7 @@ migrate((db) => {
   let stag;
   try { stag = dao.findFirstRecordByData("stags", "slug", "bcn"); }
   catch (_) {
-    console.log("[1748000025_bcn_sensi_replaces_tapas24] bcn stag not found, skipping");
+    console.log("[1748000028_bcn_sensi_replaces_tapas24] bcn stag not found, skipping");
     return;
   }
 
@@ -57,7 +57,7 @@ migrate((db) => {
     website_url: "https://sensi.es/coleccion/",
   });
 
-  console.log("[1748000025_bcn_sensi_replaces_tapas24] Tapas 24 → Colección by Sensi");
+  console.log("[1748000028_bcn_sensi_replaces_tapas24] Tapas 24 → Colección by Sensi");
 }, (db) => {
   const dao = new Dao(db);
   let stag;

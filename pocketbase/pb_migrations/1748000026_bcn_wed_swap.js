@@ -45,7 +45,7 @@ migrate((db) => {
   let stag;
   try { stag = findStag(dao, BCN); }
   catch (_) {
-    console.log("[1748000013_bcn_wed_swap] bcn stag not found, skipping");
+    console.log("[1748000026_bcn_wed_swap] bcn stag not found, skipping");
     return;
   }
 
@@ -66,7 +66,7 @@ migrate((db) => {
     note:        "★ Sunset drinks on the Sir Victor rooftop after dinner — wooden deck, glittering pool, sleek bar, with Gaudí's La Pedrera one block away and the Sagrada Família spires beyond. Early-June sunset is ~9:25pm, so 9pm puts you on the terrace right as the light goes gold. Creative cocktails and organic wines, then roll on to Paradiso.\n\nIt's a hotel rooftop and fills up at golden hour — worth booking a table, or get there early for the loungers. Carrer del Rosselló 265, top of Passeig de Gràcia.",
   });
 
-  console.log("[1748000013_bcn_wed_swap] dinner/rooftop order swapped");
+  console.log("[1748000026_bcn_wed_swap] dinner/rooftop order swapped");
 }, (db) => {
   // Down: restore pre-dinner rooftop ordering.
   const dao = new Dao(db);

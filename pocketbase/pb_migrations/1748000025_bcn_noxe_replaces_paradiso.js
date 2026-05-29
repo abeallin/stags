@@ -36,7 +36,7 @@ migrate((db) => {
   let stag;
   try { stag = dao.findFirstRecordByData("stags", "slug", "bcn"); }
   catch (_) {
-    console.log("[1748000023_bcn_noxe_replaces_paradiso] bcn stag not found, skipping");
+    console.log("[1748000025_bcn_noxe_replaces_paradiso] bcn stag not found, skipping");
     return;
   }
 
@@ -60,7 +60,7 @@ migrate((db) => {
     website_url: "https://ra.co/events/2451728",
   });
 
-  console.log("[1748000023_bcn_noxe_replaces_paradiso] Paradiso speakeasy → Noxe rooftop club");
+  console.log("[1748000025_bcn_noxe_replaces_paradiso] Paradiso speakeasy → Noxe rooftop club");
 }, (db) => {
   const dao = new Dao(db);
   let stag;
