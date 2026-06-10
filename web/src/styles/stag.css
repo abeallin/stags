@@ -1747,3 +1747,20 @@ body.editing .slot-edit-icons { display: flex; flex-wrap: wrap; }
   border-top: 1.5px solid var(--ink);
 }
 .slot-map-open:hover { background: var(--accent); color: var(--ink); }
+
+/* ─── PAST-EVENTS COLLAPSE STRIP ──────────────────────────────────── */
+.past-toggle {
+  width: 100%;
+  display: block;
+  background: var(--bone);
+  border: 1px dashed var(--ash-faint);
+  color: var(--ash);
+  font-family: 'DM Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  padding: 8px;
+  margin: 0 0 12px;
+  cursor: pointer;
+}
+.past-toggle:hover { color: var(--ink); border-color: var(--ink); }
