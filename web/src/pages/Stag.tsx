@@ -6,6 +6,7 @@ import { determineTripState, findTodayDayId, formatTMinus, slotStateMap } from "
 import { buildUndoOps } from "../lib/undo";
 import { computeSwap } from "../lib/reorder";
 import { withSlotRequired, padSeconds } from "../lib/pbDate";
+import { getDevNowOverride } from "../lib/devClock";
 import Header from "../components/Header";
 import DayTabs from "../components/DayTabs";
 import Day from "../components/Day";
@@ -20,11 +21,13 @@ export default function Stag({ slug }: { slug: string }) {
   const { bundle, error } = useStagData(slug);
   const [activeDayId, setActiveDayId] = useState<string>("");
   const [userPickedDay, setUserPickedDay] = useState(false);
-  const [now, setNow] = useState(new Date());
+  const devNowRef = useRef<Date | null>(getDevNowOverride(window.location.search, import.meta.env.DEV));
+  const [now, setNow] = useState<Date>(() => devNowRef.current ?? new Date());
   const [editing, setEditing] = useState(false);
   const [displayName, setDisplayName] = useState<string>(localStorage.getItem(DISPLAY_NAME_KEY) ?? "");
 
   useEffect(() => {
+    if (devNowRef.current) return; // frozen clock under ?now= override
     const id = setInterval(() => setNow(new Date()), 30_000);
     return () => clearInterval(id);
   }, []);
