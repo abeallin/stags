@@ -1,4 +1,4 @@
-import { useState, type CSSProperties } from "react";
+import { useState, useEffect, type CSSProperties } from "react";
 import type { Slot as SlotType } from "../lib/types";
 import EditSlotModal from "./EditSlotModal";
 import { hostname } from "../lib/useLinkPreview";
@@ -16,6 +16,11 @@ interface Props {
 
 export default function Slot({ slot, state = "future", index = 0, onSave, onDelete, onMove }: Props) {
   const [editOpen, setEditOpen] = useState(false);
+  const [mapOpen, setMapOpen] = useState(state === "now");
+  // If a later slot becomes "now" while on screen, auto-open its map.
+  useEffect(() => {
+    if (state === "now") setMapOpen(true);
+  }, [state]);
 
   const primaryUrl = slot.map_url || slot.website_url;
   const showWebsitePill =
@@ -53,7 +58,7 @@ export default function Slot({ slot, state = "future", index = 0, onSave, onDele
 
       {slot.note && <p className="slot-note">{slot.note}</p>}
 
-      {slot.map_url && (
+      {slot.map_url && (mapOpen ? (
         <div className="slot-map">
           <iframe
             src={toEmbedUrl(slot.map_url)}
@@ -63,7 +68,28 @@ export default function Slot({ slot, state = "future", index = 0, onSave, onDele
             referrerPolicy="no-referrer-when-downgrade"
           />
         </div>
-      )}
+      ) : (
+        <div className="slot-map slot-map-placeholder">
+          <button
+            type="button"
+            className="slot-map-load"
+            onClick={() => setMapOpen(true)}
+            aria-label={`Load map of ${slot.title}`}
+          >
+            <span className="slot-map-pin" aria-hidden="true">◉</span>
+            <span className="slot-map-name">{slot.title}</span>
+            <span className="slot-map-hint">Tap to load map</span>
+          </button>
+          <a
+            className="slot-map-open"
+            href={slot.map_url}
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            Open in Maps ↗
+          </a>
+        </div>
+      ))}
 
       {showWebsitePill && (
         <a
