@@ -212,7 +212,7 @@ Editor users (`bcn-editor`, `sthlm-editor`) are created out of band by an admin 
 **Backend (Railway)**:
 - Railway watches the repo, builds `pocketbase/Dockerfile`.
 - Dockerfile: Alpine base, downloads PocketBase binary at the version pinned in the file, copies `pb_migrations/`, exposes port 8090.
-- Persistent volume mounted at `/pb_data` for the SQLite file.
+- Persistent volume mounted at `/pb/pb_data` for the SQLite file (must match the PocketBase data dir, not `/pb_data`).
 - Env vars: none required by PocketBase itself; admin credentials set on first boot via the admin UI.
 - Editor user credentials (the passphrases) are configured manually in the admin UI after first deploy.
 

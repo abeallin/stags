@@ -11,4 +11,7 @@ COPY pb_migrations /pb/pb_migrations
 
 EXPOSE 8090
 
-CMD ["/pb/pocketbase", "serve", "--http=0.0.0.0:8090"]
+# --dir pins the SQLite/data location to the Railway persistent volume mount
+# point. Without a volume mounted here, pb_data is ephemeral and every redeploy
+# re-runs all migrations from scratch, reverting any edits made via the app.
+CMD ["/pb/pocketbase", "serve", "--http=0.0.0.0:8090", "--dir=/pb/pb_data"]
