@@ -1698,3 +1698,111 @@ body.editing .slot-edit-icons { display: flex; flex-wrap: wrap; }
     scroll-behavior: auto !important;
   }
 }
+
+/* ─── MAP PLACEHOLDER (tap to load) ───────────────────────────────── */
+.slot-map-placeholder {
+  display: flex;
+  flex-direction: column;
+}
+.slot-map-load {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  width: 100%;
+  background: var(--bone);
+  border: none;
+  cursor: pointer;
+  font-family: 'DM Mono', monospace;
+  color: var(--ink);
+}
+.slot-map-pin { color: var(--accent); font-size: 22px; line-height: 1; }
+.slot-map-name {
+  font-size: 11px;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  padding: 0 10px;
+  text-align: center;
+}
+.slot-map-hint {
+  font-size: 9px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--ash);
+}
+.slot-map-open {
+  display: block;
+  text-align: center;
+  padding: 6px;
+  font-family: 'DM Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  background: var(--ink);
+  color: var(--paper);
+  text-decoration: none;
+  border-top: 1.5px solid var(--ink);
+}
+.slot-map-open:hover { background: var(--accent); color: var(--ink); }
+
+/* ─── PAST-EVENTS COLLAPSE STRIP ──────────────────────────────────── */
+.past-toggle {
+  width: 100%;
+  display: block;
+  background: var(--bone);
+  border: 1px dashed var(--ash-faint);
+  color: var(--ash);
+  font-family: 'DM Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  padding: 8px;
+  margin: 0 0 12px;
+  cursor: pointer;
+}
+.past-toggle:hover { color: var(--ink); border-color: var(--ink); }
+
+/* ─── NOW BAR (sticky jump-to-current) ────────────────────────────── */
+.now-bar {
+  position: sticky;
+  top: 64px; /* sits just under the sticky .day-tabs (mobile tab strip height) */
+  z-index: 9;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 14px;
+  background: var(--accent);
+  color: var(--ink);
+  border: none;
+  border-bottom: 2px solid var(--ink);
+  cursor: pointer;
+  text-align: left;
+  font-family: 'DM Mono', monospace;
+}
+.now-bar-dot { font-size: 9px; animation: now-bar-blink 1.4s ease-in-out infinite; }
+.now-bar-label { font-family: 'Bowlby One', Impact, sans-serif; font-size: 12px; letter-spacing: 1px; }
+.now-bar-title {
+  flex: 1;
+  min-width: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  font-size: 12px;
+  font-weight: 500;
+}
+.now-bar-time { font-size: 11px; opacity: 0.8; white-space: nowrap; }
+.now-bar-jump { font-size: 14px; }
+@keyframes now-bar-blink {
+  0%, 100% { opacity: 1; }
+  50%      { opacity: 0.3; }
+}
+
+/* The NOW bar is a phone affordance; the desktop layout has a persistent
+   day-tab sidebar, and the bar would otherwise land in the grid sidebar. */
+@media (min-width: 900px) {
+  .now-bar { display: none; }
+}

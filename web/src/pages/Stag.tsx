@@ -6,9 +6,13 @@ import { determineTripState, findTodayDayId, formatTMinus, slotStateMap } from "
 import { buildUndoOps } from "../lib/undo";
 import { computeSwap } from "../lib/reorder";
 import { withSlotRequired, padSeconds } from "../lib/pbDate";
+import { getDevNowOverride } from "../lib/devClock";
 import Header from "../components/Header";
 import DayTabs from "../components/DayTabs";
 import Day from "../components/Day";
+import NowBar from "../components/NowBar";
+import { useNowSlotVisibility } from "../lib/useNowSlotVisibility";
+import { findNowSlot } from "../lib/todayView";
 import { pb } from "../lib/pb";
 import { confirm as confirmDialog, toast } from "../lib/dialogs";
 import type { Slot as SlotType } from "../lib/types";
@@ -20,11 +24,13 @@ export default function Stag({ slug }: { slug: string }) {
   const { bundle, error } = useStagData(slug);
   const [activeDayId, setActiveDayId] = useState<string>("");
   const [userPickedDay, setUserPickedDay] = useState(false);
-  const [now, setNow] = useState(new Date());
+  const devNowRef = useRef<Date | null>(getDevNowOverride(window.location.search, import.meta.env.DEV));
+  const [now, setNow] = useState<Date>(() => devNowRef.current ?? new Date());
   const [editing, setEditing] = useState(false);
   const [displayName, setDisplayName] = useState<string>(localStorage.getItem(DISPLAY_NAME_KEY) ?? "");
 
   useEffect(() => {
+    if (devNowRef.current) return; // frozen clock under ?now= override
     const id = setInterval(() => setNow(new Date()), 30_000);
     return () => clearInterval(id);
   }, []);
@@ -61,6 +67,13 @@ export default function Stag({ slug }: { slug: string }) {
     return () => document.body.classList.remove("editing");
   }, [editing]);
 
+  function scrollToNow() {
+    const el = document.querySelector(".day-section.active .slot.is-now");
+    if (!el) return;
+    const reduce = window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
+    el.scrollIntoView({ behavior: reduce ? "auto" : "smooth", block: "center" });
+  }
+
   // One-shot: when the trip is live, scroll the NOW slot into view on open.
   const didAutoScrollRef = useRef(false);
   useEffect(() => {
@@ -69,10 +82,7 @@ export default function Stag({ slug }: { slug: string }) {
     const el = document.querySelector(".day-section.active .slot.is-now");
     if (!el) return;
     didAutoScrollRef.current = true;
-    const reduce = window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
-    requestAnimationFrame(() =>
-      el.scrollIntoView({ behavior: reduce ? "auto" : "smooth", block: "center" }),
-    );
+    requestAnimationFrame(() => scrollToNow());
   }, [bundle, activeDayId, now]);
 
   const edits = useEditHistory(bundle?.stag.id);
@@ -259,15 +269,24 @@ export default function Stag({ slug }: { slug: string }) {
     return all;
   }, [bundle?.days, bundle?.slots, now]);
 
+  const todayId = findTodayDayId(bundle?.days ?? [], now);
+  const nowSlotForBar =
+    bundle && activeDayId === todayId
+      ? findNowSlot(slotsByDay.get(activeDayId) ?? [], slotStates.get(activeDayId))
+      : null;
+  const nowVisible = useNowSlotVisibility(
+    nowSlotForBar ? `${activeDayId}:${nowSlotForBar.id}` : null,
+  );
+
   if (error)   return <div style={{ padding: 24 }}>Failed to load: {error}</div>;
   if (!bundle) return <div style={{ padding: 24 }}>Loading…</div>;
 
   const state = determineTripState(bundle.stag, now);
+  const showNowBar = state === "in" && !!nowSlotForBar && !nowVisible;
   const badge =
     state === "pre"  ? formatTMinus(bundle.stag.start_date, now) :
     state === "post" ? "Trip complete" : undefined;
 
-  const todayId = findTodayDayId(bundle.days, now);
   let progress: { frac: number; label: string } | undefined;
   if (state === "in") {
     const tripStart = +new Date(bundle.stag.start_date + "T00:00");
@@ -300,6 +319,9 @@ export default function Stag({ slug }: { slug: string }) {
         }}
         onAddDay={editing ? handleAddDay : undefined}
       />
+      {showNowBar && nowSlotForBar && (
+        <NowBar slot={nowSlotForBar} onJump={scrollToNow} />
+      )}
       {bundle.days.map(d => (
         <Day
           key={d.id}
