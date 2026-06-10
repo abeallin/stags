@@ -1768,7 +1768,7 @@ body.editing .slot-edit-icons { display: flex; flex-wrap: wrap; }
 /* ─── NOW BAR (sticky jump-to-current) ────────────────────────────── */
 .now-bar {
   position: sticky;
-  top: 44px; /* sits just under the sticky .day-tabs; tune if it overlaps */
+  top: 64px; /* sits just under the sticky .day-tabs (mobile tab strip height) */
   z-index: 9;
   width: 100%;
   display: flex;
@@ -1799,4 +1799,10 @@ body.editing .slot-edit-icons { display: flex; flex-wrap: wrap; }
 @keyframes now-bar-blink {
   0%, 100% { opacity: 1; }
   50%      { opacity: 0.3; }
+}
+
+/* The NOW bar is a phone affordance; the desktop layout has a persistent
+   day-tab sidebar, and the bar would otherwise land in the grid sidebar. */
+@media (min-width: 900px) {
+  .now-bar { display: none; }
 }
